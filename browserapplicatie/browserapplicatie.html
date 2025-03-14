@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="browserapplicatie.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sofia+Sans+Condensed:ital,wght@0,1..1000;1,1..1000&display=swap" rel="stylesheet">
+    <link rel="icon" href="car-solid.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/50ff58d780.js" crossorigin="anonymous"></script>
+    <style>
+        #timer {
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+    <style>
+        body{
+            font-family: 'Sofia Sans Condensed', sans-serif;
+            margin: 10px;
+            padding:5px;
+            box-sizing:border-box;
+            font-size: xx-large;
+        }
+    </style>
+</head>
+<title>Controlepaneel 304</title>
+
+
+<body>
+
+
+
+<div class="titel">
+    <h1> Autonoom wagentje </h1>
+
+    <div class="stat">
+        <div class="connectb">
+            <button style="font-size: large;padding: 10px;border-radius: 10px;" onclick="connect_socket()">Connect</button>
+        </div>
+        <h3 id="status">Status: Disconnected</h3>
+    </div>
+</div>
+
+<div class="main">
+    <div class="Controls">
+        <h3> Controls</h3>
+        <hr style="border: 2px solid black; width: 50%;">
+        <div class="Buttons">
+            <button class="btn-up" onclick="sendCommand('move_forward')">
+                <i class="fa-solid fa-arrow-up fa-5x"></i>
+            </button>
+            <button class="btn-down" onclick="sendCommand('move_backward')">
+                <i class="fa-solid fa-arrow-down fa-5x"></i>
+            </button>
+            <button class="btn-automatic" onclick="sendCommand('automatic')">
+                automatisch
+            </button>
+            <button class="btn-right" onclick="sendCommand('move_right')">
+                <i class="fa-solid fa-arrow-right fa-5x"></i>
+            </button>
+            <button class="btn-left" onclick="sendCommand('move_left')">
+                <i class="fa-solid fa-arrow-left fa-5x"></i>
+            </button>
+            <button class="btn-stop" onclick="sendCommand('STOP')">
+                <i class="fa-solid fa-stop fa-5x" style="color: #f70202;"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="map">
+        map
+    </div>
+</div>
+
+<div class="feedback">
+    <h3>Timer:</h3>
+    <div id="countdown"></div>
+    <button onclick="startTimer()">Start</button>
+    <button onclick="stopTimer()">Stop</button>
+    <button onclick="resetTimer()">Reset</button>
+    <div class="score"><h3>Score:</h3></div>
+    <div class="soort score">
+        <p class="Scores" id="tijdscore">Tijd</p>
+        <div id="timescore">score Tijd</div>
+        <p class="Scores" id="GTscore">Groene torens</p>
+        <div id="scoregreen">score Groene torens</div>
+        <p class="Scores" id="RTscore">Rode torens</p>
+        <div id="scorered">score Rode torens</div>
+        <p class="Scores" id="terugingaragescore">terug in garage</p>
+        <div id="garagescore">
+            score terug in garage
+            <i class="fa-solid fa-flag-checkered"></i>
+        </div>
+        <h4 id="totaalscore" style="margin: auto;">Totaal</h4>
+        <div id="totalscore"> totalscore</div>
+    </div>
+</div>
+<script src="browserapplicatie.js"></script>
+</body> 
+
+
+</html>
+

@@ -1,0 +1,237 @@
+.titel{
+    padding: 5px;
+    margin: 5px;
+    border: 3px solid black;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, rgb(67, 67, 173), rgb(79, 119, 133));
+    height: 200px;
+    box-shadow: 3px 3px 10px black;
+    top: 10px;
+}
+
+.titel button:hover{
+    background-color: rgb(215, 216, 218);
+}
+.titel button:active{
+    background-color: rgb(149, 206, 255);
+}
+.titel h1 {
+    margin-bottom: 5px;
+    text-shadow: 3px 3px 10px rgb(143, 206, 184), -5px -5px 5px rgb(52, 83, 109);
+}
+
+
+body {
+    background-color: rgb(143, 206, 184);
+}
+
+
+.connectb {
+    padding: 10px;
+    margin: 10px;
+    margin-right: 40px;
+    display: flex;
+    align-items: center;
+    font-size: large ;
+}
+
+
+
+.stat{
+    padding: 5px;
+    margin: 10px;
+    width:100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+}
+
+.stat h3 {
+    display: inline-block;
+    margin: 0;
+}
+
+.Controls {
+    padding: 5px;
+    margin: 10px;
+    border: 5px solid black;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    font-size: larger;
+    background-color: white;
+}
+
+.Controls h3{
+    text-align: center;
+
+}
+
+.Buttons {
+    margin: auto;
+    display: grid;
+    padding: 10px;
+    align-items: center;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 10px;
+    overflow: visible;
+}
+
+.Buttons button:hover{
+    background-color: rgb(172, 172, 172);
+}
+
+.Buttons button:active{
+    background-color: rgb(255, 118, 118);
+}
+
+.Buttons button{
+    border-radius: 20px;
+
+}
+
+.btn-up {
+    grid-area: 1/2;
+}
+
+.btn-down {
+    grid-area: 3/2;
+}
+.btn-left {
+    grid-area: 2/1;
+}
+.btn-right {
+    grid-area: 2/3;
+}
+.btn-stop {
+    grid-area: 2/2;
+}
+
+
+.main {
+    padding: 5px;
+    margin: 10px;
+    border-radius: 5px;
+    display: flex;
+    height: 900px;
+}
+
+.main map{
+    padding: 5px;
+    margin: 10px;
+    border: 5px solid black;
+    border-radius: 5px display flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+}
+.map{
+    padding: 5px;
+    margin: 10px;
+    border: 5px solid black;
+    border-radius: 5px;display: flex;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70%;
+    background-color: white;
+}
+
+.feedback{
+    padding: 5px;
+    margin: 10px;
+    border: 5px solid black;
+    border-radius: 5px;display: flex;
+    height: 15cqmax;
+    background-color: white;
+    box-shadow: 3px 3px 10px black;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    gap: 10px;
+    
+}
+
+.feedback h3{
+    margin: 0px;
+    padding: 0px;
+    display: inline-block;
+    margin-bottom: 0px;
+    grid-area: 1/1;
+}
+#countdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 5px;
+    padding: 3px; /* Adds space inside the border */
+    border: 3px solid black; /* Ensures the border remains fixed */
+    width: fit-content; /* Adjust width based on content */
+    min-width: 60px; /* Prevents shrinking too much */
+    height: auto; /* Ensures height only depends on content */
+    align-self: flex-start; /* Prevents it from stretching */
+    border-radius: 10px;
+    grid-area: 1/1;
+
+}
+.feedback button{
+    padding: 10px;
+    align-self: flex-start;
+    height: auto;
+}
+
+.score{
+    grid-area: 1/2;
+    margin-left: 50px;
+}
+
+.soort.score{
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    border-bottom: 2px solid grey;
+}
+
+#tijdscore{
+    grid-area: 1/1;
+    border-right: 3px solid black;
+}
+#GTscore{
+    grid-area: 1/2;
+    border-right: 3px solid black;
+}
+#RTscore{
+    grid-area: 1/3;
+    border-right: 3px solid black;
+}
+#terugingaragescore{
+    grid-area: 1/4;
+    
+}
+#totaalscore{
+    grid-area: 3/1
+}
+
+#timescore{
+    grid-area: 2/1;
+}
+
+#totalscore{
+    grid-area: 3/2;
+    border: 3px solid black;
+    align-self: flex-start;
+    align-items: center;
+    padding-left: 2px;
+    display: flex;
+    justify-content: center;
+    background-color: hwb(114 53% 0%);
+}
