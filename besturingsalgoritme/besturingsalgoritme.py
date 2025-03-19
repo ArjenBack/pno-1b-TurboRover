@@ -1,4 +1,3 @@
-#De eerste waarden van de LDR's moeten uitgelezen worden voor het programma start
 import board
 import time
 import pwmio
