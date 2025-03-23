@@ -1,3 +1,6 @@
+LARGE = False
+
+import re
 import board
 import time
 import pwmio
@@ -24,6 +27,19 @@ def motor_dir_reset():
     relais_rechts.value = True
     relais_links.value = True
 
+
+if not LARGE:
+    for i in range(3):
+        motor_dir_reset()
+        motor_stop()
+        motor_links.duty_cycle = 30000
+        motor_rechts.duty_cycle = 30000
+        time.sleep(3)
+        relais_links.value = not relais_links.value
+        relais_rechts.value = not relais_rechts.value
+        time.sleep(3)
+
+    motor_stop()
 
 for i in range(5):
     motor_dir_reset()
