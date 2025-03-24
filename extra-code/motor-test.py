@@ -1,14 +1,14 @@
-LARGE = False
+LARGE = True
 
 import board
 import time
 import pwmio
 import digitalio
 
-motor_links =  pwmio.PWMOut(board.GP0)
-motor_rechts = pwmio.PWMOut(board.GP1)
-relais_links = digitalio.DigitalInOut(board.GP2)
-relais_rechts = digitalio.DigitalInOut(board.GP3)
+motor_links =  pwmio.PWMOut(board.GP1)
+motor_rechts = pwmio.PWMOut(board.GP0)
+relais_links = digitalio.DigitalInOut(board.GP3)
+relais_rechts = digitalio.DigitalInOut(board.GP2)
 
 relais_links.direction = digitalio.Direction.OUTPUT
 relais_links.value = True
@@ -111,3 +111,4 @@ for i in range(5):
     motor_rechts.duty_cycle = 65000
 
     time.sleep(2)
+
