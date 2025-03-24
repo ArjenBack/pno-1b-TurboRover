@@ -1,6 +1,5 @@
 LARGE = False
 
-import re
 import board
 import time
 import pwmio
