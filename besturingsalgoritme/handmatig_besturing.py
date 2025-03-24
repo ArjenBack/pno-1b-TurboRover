@@ -34,8 +34,8 @@ def drive_forward(speed):
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
     time.sleep(0.1)
-    relais_links.Value = True
-    relais_rechts.Value = True
+    relais_links.value = True
+    relais_rechts.value = True
     motor_links.duty_cycle = speed * 65000
     motor_rechts.duty_cycle = speed * 65000
 
@@ -43,8 +43,8 @@ def drive_backward(speed):
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
     time.sleep(0.1)
-    relais_links.Value = False
-    relais_rechts.Value = False
+    relais_links.value = False
+    relais_rechts.value = False
     motor_links.duty_cycle = speed * 65000
     motor_rechts.duty_cycle = speed * 65000
 
