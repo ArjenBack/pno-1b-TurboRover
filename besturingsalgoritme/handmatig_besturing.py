@@ -4,8 +4,6 @@ import pwmio
 import digitalio
 from analogio import AnalogIn
 
-from besturingsalgoritme.besturingsalgoritme import MINIMUM_AFWIJKWAARDE_LINKS
-
 ### Defineren van de pinnen
 
 # LDR-s
@@ -26,27 +24,27 @@ relais_rechts.direction = digitalio.Direction.OUTPUT
 relais_rechts.value = False
 
 # Gevoeligheden
-MINIMUM_AFWIJKWAARDE_LINKS = 11000
+MINIMUM_AFWIJKWAARDE_LINKS = 24000
 MINIMUM_AFWIJKWAARDE_RECHTS = 8000
 MINIMUM_AFWIJKWAARDE_ACHTER = 14000
 
 def drive_forward(speed):
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
-    time.sleep(0.1)
     relais_links.value = True
+    time.sleep(0.1)
     relais_rechts.value = True
-    motor_links.duty_cycle = speed * 65000
-    motor_rechts.duty_cycle = speed * 65000
+    motor_links.duty_cycle = int(speed * 65000)
+    motor_rechts.duty_cycle = int(speed * 65000)
 
 def drive_backward(speed):
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
-    time.sleep(0.1)
     relais_links.value = False
+    time.sleep(0.1)
     relais_rechts.value = False
-    motor_links.duty_cycle = speed * 65000
-    motor_rechts.duty_cycle = speed * 65000
+    motor_links.duty_cycle = 30000
+    motor_rechts.duty_cycle = 30000
 
 
 def drive_line():
@@ -56,20 +54,32 @@ def drive_line():
     LDR_rechts_value = LDR_rechts.value
     LDR_achter_value = LDR_achter.value
 
-    while not crossroad_found:
-        prev_LDR_link_value = LDR_links_value
-        prev_LDR_rechts_value = LDR_rechts_value
-        prev_LDR_achter_value = LDR_achter_value
+    drive_forward(1)
 
+    while not crossroad_found:
+        time.sleep(0.1)
+        prev_LDR_achter_value = LDR_achter_value
         LDR_links_value = LDR_links.value
         LDR_rechts_value = LDR_rechts.value
         LDR_achter_value = LDR_achter.value
 
-        if abs(prev_LDR_link_value - LDR_links_value) < MINIMUM_AFWIJKWAARDE_LINKS:
-            motor_links.duty_cycle = int(motor_links.duty_cycle / 2)
-        elif abs(prev_LDR_rechts_value - LDR_rechts_value) < MINIMUM_AFWIJKWAARDE_RECHTS:
-            motor_rechts.duty_cycle = int(motor_rechts.duty_cycle / 2)
-        elif abs(prev_LDR_achter_value - LDR_achter_value) < MINIMUM_AFWIJKWAARDE_ACHTER:
+        #print("links: %s, rechts: %s, diff: %s" %(LDR_links_value, LDR_rechts_value ,LDR_links_value - LDR_rechts_value))
+
+        if LDR_links_value - LDR_rechts_value < -18000:
+            motor_rechts.duty_cycle = 15000
+            motor_links.duty_cycle = 30000
+            print("links-afw")
+        elif LDR_links_value - LDR_rechts_value > 18000:
+            motor_links.duty_cycle = 15000
+            motor_rechts.duty_cycle = 30000
+            print("rechts-afw")
+        elif abs(prev_LDR_achter_value - LDR_achter_value) > MINIMUM_AFWIJKWAARDE_ACHTER:
             crossroad_found = True
+            motor_links.duty_cycle = 0
+            motor_rechts.duty_cycle = 0
+            print("crossroads")
         else:
-            drive_forward(1)
+            drive_forward(0.5)
+            print("nothing detected")
+
+drive_line()
