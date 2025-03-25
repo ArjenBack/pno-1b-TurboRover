@@ -3,6 +3,7 @@ import time
 import pwmio
 import digitalio
 from analogio import AnalogIn
+from tkinter.constants import ARC
 
 ### Defineren van de pinnen
 
@@ -32,9 +33,10 @@ MINIMUM_AFWIJKWAARDE_ACHTER = 14000
 def drive_forward(speed):
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
+
     relais_links.value = True
-    time.sleep(0.1)
     relais_rechts.value = True
+
     motor_links.duty_cycle = int(speed * 65000)
     motor_rechts.duty_cycle = int(speed * 65000)
 
@@ -52,6 +54,7 @@ def drive_backward(speed):
 def drive_line():
     crossroad_found = False
 
+    # Initialize LDR values
     LDR_links_value = LDR_links.value
     LDR_rechts_value = LDR_rechts.value
     LDR_achter_value = LDR_achter.value
@@ -60,29 +63,34 @@ def drive_line():
 
     while not crossroad_found:
         time.sleep(0.1)
+
+        # Behoud vorige waarde
         prev_LDR_achter_value = LDR_achter_value
+
+        # Update LDR waarde
         LDR_links_value = LDR_links.value
         LDR_rechts_value = LDR_rechts.value
         LDR_achter_value = LDR_achter.value
 
-        # print("links: %s, rechts: %s, diff: %s" %(LDR_links_value, LDR_rechts_value ,LDR_links_value - LDR_rechts_value))
-
+        # aanpassing links
         if LDR_links_value - LDR_rechts_value < -18000:
             motor_rechts.duty_cycle = 15000
             motor_links.duty_cycle = 30000
-            print("links-afw")
+
+        # aanpassing rechts
         elif LDR_links_value - LDR_rechts_value > 18000:
             motor_links.duty_cycle = 15000
             motor_rechts.duty_cycle = 30000
-            print("rechts-afw")
+
+        # kruispunt stop
         elif abs(prev_LDR_achter_value - LDR_achter_value) > MINIMUM_AFWIJKWAARDE_ACHTER:
             crossroad_found = True
             motor_links.duty_cycle = 0
             motor_rechts.duty_cycle = 0
-            print("crossroads")
+
+        # Zet motoren gelijk
         else:
             drive_forward(0.5)
-            print("nothing detected")
 
 
 def turn_left():
