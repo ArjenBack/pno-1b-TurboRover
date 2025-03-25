@@ -132,7 +132,42 @@ def turn_left():
             black_found = True
             print("Found black")
 
+def turn_right():
+    motor_links.duty_cycle = 0
+    motor_rechts.duty_cycle = 0
+    relais_links.value = True
+    relais_rechts.value = False
+    motor_links.duty_cycle = 15000
+    motor_rechts.duty_cycle = 15000
+    LDR_links_value = LDR_links.value
+    LDR_rechts_value = LDR_rechts.value
+    LDR_achter_value = LDR_achter.value
 
-while True:
-    drive_line()
-    turn_left()
+    ref = time.monotonic()
+    black_found = False
+    while True:
+
+        time.sleep(0.05)
+        prev_LDR_achter_value = LDR_achter_value
+        prev_LDR_links_value = LDR_links_value
+        prev_LDR_rechts_value = LDR_rechts_value
+
+        LDR_links_value = LDR_links.value
+        LDR_rechts_value = LDR_rechts.value
+        LDR_achter_value = LDR_achter.value
+
+        print(
+            "links: %s, rechts: %s, diff: %s" % (LDR_links_value, LDR_rechts_value, LDR_links_value - LDR_rechts_value))
+
+        if black_found and LDR_links_value - LDR_rechts_value > 16000 and time.monotonic() > (ref + 0.5):
+            motor_links.duty_cycle = 0
+            motor_rechts.duty_cycle = 0
+            print("stopped")
+            break
+
+        if LDR_links_value - LDR_rechts_value < -18000:
+            black_found = True
+            print("Found black")
+
+drive_line()
+turn_right()
