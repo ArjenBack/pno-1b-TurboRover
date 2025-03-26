@@ -3,6 +3,8 @@ import time
 import pwmio
 import digitalio
 from analogio import AnalogIn
+from adafruit_motor import servo
+
 
 ### Defineren van de pinnen
 
@@ -22,6 +24,11 @@ relais_links.value = False
 relais_rechts = digitalio.DigitalInOut(board.GP2)
 relais_rechts.direction = digitalio.Direction.OUTPUT
 relais_rechts.value = False
+
+# Servo-motor
+
+servo_PWM = pwmio.PWMOut(board.GP5, duty_cycle = 2 ** 15, frequency = 50)
+servo_motor = servo.Servo(servo_PWM)
 
 # Gevoeligheden
 MINIMUM_AFWIJKWAARDE_LINKS = 24000
@@ -168,6 +175,15 @@ def turn_right():
         if LDR_links_value - LDR_rechts_value < -18000:
             black_found = True
             print("Found black")
+
+
+def pick_up_torentje():
+
+    servo_motor.angle = 0
+    time.sleep(0.3)
+    servo_motor.angle = 135
+    time.sleep(0.3)
+    servo_motor.angle = 0
 
 drive_line()
 turn_right()
