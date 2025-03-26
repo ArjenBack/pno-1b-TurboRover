@@ -3,7 +3,12 @@ import time
 import pwmio
 import digitalio
 from analogio import AnalogIn
+<<<<<<< HEAD
 import random
+=======
+from adafruit_motor import servo
+
+>>>>>>> 850643582d6a7ae8df73fa8a50c2d68d3ae9416e
 
 ### Defineren van de pinnen
 
@@ -23,6 +28,11 @@ relais_links.value = False
 relais_rechts = digitalio.DigitalInOut(board.GP2)
 relais_rechts.direction = digitalio.Direction.OUTPUT
 relais_rechts.value = False
+
+# Servo-motor
+
+servo_PWM = pwmio.PWMOut(board.GP5, duty_cycle = 2 ** 15, frequency = 50)
+servo_motor = servo.Servo(servo_PWM)
 
 # Gevoeligheden
 MINIMUM_AFWIJKWAARDE_LINKS = 24000
@@ -170,6 +180,7 @@ def turn_right():
             black_found = True
             print("Found black")
 
+<<<<<<< HEAD
 def dance():
     for i in range(5):
         motor_links.duty_cycle = 0
@@ -193,3 +204,16 @@ motor_links.duty_cycle = 1000
 motor_rechts.duty_cycle = 1000
 
 dance()
+=======
+
+def pick_up_torentje():
+
+    servo_motor.angle = 0
+    time.sleep(0.3)
+    servo_motor.angle = 135
+    time.sleep(0.3)
+    servo_motor.angle = 0
+
+drive_line()
+turn_right()
+>>>>>>> 850643582d6a7ae8df73fa8a50c2d68d3ae9416e
