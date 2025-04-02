@@ -225,7 +225,6 @@ drive_line()
 turn_right()
 
 """
-Gedeelte om uiteindelijk tekstbestand te lezen:
 with open('testfile.txt', 'r') as file:
     tekst = file.readlines()
     for lijn in tekst:
