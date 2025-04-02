@@ -55,7 +55,7 @@ def drive_forward(speed):
 def drive_backward(speed):
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
-    RGB.status_led("red") #RGB kleurt rood
+    RGB.status_led("red") #RGB kleurt rood volgens aan-uit-cyclus
     relais_links.value = False
     time.sleep(0.1)
     relais_rechts.value = False
@@ -108,7 +108,7 @@ def drive_line():
             motor_rechts.duty_cycle = 0
             pick_up_torentje()
             print("Torentje wordt opgepakt...")
-            RGB.status_led("orange") #Laat RGB-LED oranje branden
+            RGB.status_led("orange") #Laat RGB-LED oranje branden volgens aan-uit-cyclus
 
 
 
