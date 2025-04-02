@@ -223,4 +223,13 @@ def pick_up_torentje():
 
 drive_line()
 turn_right()
+
+"""
+Gedeelte om uiteindelijk tekstbestand te lezen:
+with open('testfile.txt', 'r') as file:
+    tekst = file.readlines()
+    for lijn in tekst:
+        lijn.strip("\n")
+"""
+
 >>>>>>> 850643582d6a7ae8df73fa8a50c2d68d3ae9416e
