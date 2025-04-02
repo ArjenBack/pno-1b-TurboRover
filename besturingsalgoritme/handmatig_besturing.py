@@ -2,6 +2,7 @@ import board
 import time
 import pwmio
 import digitalio
+import statusled as RGB
 from analogio import AnalogIn
 from adafruit_motor import servo
 
@@ -50,6 +51,7 @@ def drive_forward(speed):
 def drive_backward(speed):
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
+    RGB.status_led("orange")
     relais_links.value = False
     time.sleep(0.1)
     relais_rechts.value = False
@@ -68,6 +70,7 @@ def drive_line():
     drive_forward(0.5)
 
     while not crossroad_found:
+        RGB.status_led("default")  # Laat RGB-LED afwisselend wit-groen branden
         time.sleep(0.1)
 
         # Behoud vorige waarde
@@ -99,6 +102,9 @@ def drive_line():
             crossroad_found = True
             motor_links.duty_cycle = 0
             motor_rechts.duty_cycle = 0
+            pick_up_torentje()
+            print("Torentje wordt opgepakt...")
+            RGB.status_led("orange")
 
 
 
@@ -184,6 +190,7 @@ def pick_up_torentje():
     servo_motor.angle = 135
     time.sleep(0.3)
     servo_motor.angle = 0
+
 
 drive_line()
 turn_right()
