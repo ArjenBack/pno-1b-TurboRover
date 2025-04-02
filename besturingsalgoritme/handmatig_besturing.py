@@ -40,6 +40,9 @@ MINIMUM_AFWIJKWAARDE_LINKS = 24000
 MINIMUM_AFWIJKWAARDE_RECHTS = 8000
 MINIMUM_AFWIJKWAARDE_ACHTER = 14000
 
+#Initialiseren score groene torentjes (voor browserapplicatie)
+aantal_groene_torentjes = 0
+
 
 def drive_forward(speed):
     motor_links.duty_cycle = 0
@@ -212,13 +215,14 @@ motor_rechts.duty_cycle = 1000
 dance()
 =======
 
-def pick_up_torentje():
+def pick_up_torentje(teller):
 
     servo_motor.angle = 0
     time.sleep(0.3)
     servo_motor.angle = 135
     time.sleep(0.3)
     servo_motor.angle = 0
+    teller += 1
 
 
 drive_line()
