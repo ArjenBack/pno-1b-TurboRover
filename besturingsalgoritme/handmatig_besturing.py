@@ -4,8 +4,12 @@ import pwmio
 import digitalio
 import statusled as RGB
 from analogio import AnalogIn
+<<<<<<< HEAD
+import random
+=======
 from adafruit_motor import servo
 
+>>>>>>> 850643582d6a7ae8df73fa8a50c2d68d3ae9416e
 
 ### Defineren van de pinnen
 
@@ -84,13 +88,13 @@ def drive_line():
         print("ACHTER: prev %s, current: %s, diff: %s" % (prev_LDR_achter_value, LDR_achter_value, abs(prev_LDR_achter_value - LDR_achter_value)))
         # aanpassing links
         if LDR_links_value - LDR_rechts_value < -18000:
-            motor_rechts.duty_cycle = 15000
-            motor_links.duty_cycle = 30000
+            motor_rechts.duty_cycle = 30000
+            motor_links.duty_cycle = 60000
 
         # aanpassing rechts
         elif LDR_links_value - LDR_rechts_value > 18000:
-            motor_links.duty_cycle = 15000
-            motor_rechts.duty_cycle = 30000
+            motor_links.duty_cycle = 30000
+            motor_rechts.duty_cycle = 60000
 
         # Zet motoren gelijk
         else:
@@ -109,18 +113,23 @@ def drive_line():
 
 
 def turn_left():
+
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
+
     relais_links.value = False
     relais_rechts.value = True
+
     motor_links.duty_cycle = 15000
     motor_rechts.duty_cycle = 15000
+
     LDR_links_value = LDR_links.value
     LDR_rechts_value = LDR_rechts.value
     LDR_achter_value = LDR_achter.value
 
     ref = time.monotonic()
     black_found = False
+
     while True:
 
         time.sleep(0.05)
@@ -132,18 +141,13 @@ def turn_left():
         LDR_rechts_value = LDR_rechts.value
         LDR_achter_value = LDR_achter.value
 
-        print(
-            "links: %s, rechts: %s, diff: %s" % (LDR_links_value, LDR_rechts_value, LDR_links_value - LDR_rechts_value))
-
         if black_found and LDR_links_value - LDR_rechts_value < -16000 and time.monotonic() > (ref + 0.5):
             motor_links.duty_cycle = 0
             motor_rechts.duty_cycle = 0
-            print("stopped")
             break
 
         if LDR_links_value - LDR_rechts_value < -18000:
             black_found = True
-            print("Found black")
 
 def turn_right():
     motor_links.duty_cycle = 0
@@ -182,6 +186,31 @@ def turn_right():
             black_found = True
             print("Found black")
 
+<<<<<<< HEAD
+def dance():
+    for i in range(5):
+        motor_links.duty_cycle = 0
+        motor_rechts.duty_cycle = 0
+        relais_links.value = True
+        relais_rechts.value = False
+        motor_links.duty_cycle = 10000
+        motor_rechts.duty_cycle = 10000
+        time.sleep(0.5)
+        motor_links.duty_cycle = 0
+        motor_rechts.duty_cycle = 0
+        relais_links.value = False
+        relais_rechts.value = True
+        motor_links.duty_cycle = 10000
+        motor_rechts.duty_cycle = 10000
+        time.sleep(0.5)
+
+
+
+motor_links.duty_cycle = 1000
+motor_rechts.duty_cycle = 1000
+
+dance()
+=======
 
 def pick_up_torentje():
 
@@ -194,3 +223,4 @@ def pick_up_torentje():
 
 drive_line()
 turn_right()
+>>>>>>> 850643582d6a7ae8df73fa8a50c2d68d3ae9416e
