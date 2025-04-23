@@ -8,21 +8,21 @@ from adafruit_motor import servo
 
 
 ### Defineren van de pinnen
-SPEED = 0.05
+SPEED = 0.1
 # LDR-s
 LDR_links = AnalogIn(board.GP27)
 LDR_rechts = AnalogIn(board.GP28)
 LDR_achter = AnalogIn(board.GP26)
 
 # Motoren
-motor_links = pwmio.PWMOut(board.GP20)
-motor_rechts = pwmio.PWMOut(board.GP21)
+motor_links = pwmio.PWMOut(board.GP21)
+motor_rechts = pwmio.PWMOut(board.GP20)
 
-relais_links = digitalio.DigitalInOut(board.GP16)
+relais_links = digitalio.DigitalInOut(board.GP17)
 relais_links.direction = digitalio.Direction.OUTPUT
 relais_links.value = False
 
-relais_rechts = digitalio.DigitalInOut(board.GP17)
+relais_rechts = digitalio.DigitalInOut(board.GP16)
 relais_rechts.direction = digitalio.Direction.OUTPUT
 relais_rechts.value = False
 
@@ -72,7 +72,7 @@ def drive_line():
         time.sleep(0.1)
 
         # Behoud vorige waarde
-        prev_LDR_achter_value = LDR_achter_valu1e
+        prev_LDR_achter_value = LDR_achter_value
 
         # Update LDR waarde
         LDR_links_value = LDR_links.value
@@ -212,19 +212,5 @@ def dance():
         motor_rechts.duty_cycle = 10000
         time.sleep(0.5)
 
-
-motor_links.duty_cycle = 1000
-motor_rechts.duty_cycle = 1000
-
-
-"""
-def pick_up_torentje():
-
-    servo_motor.angle = 0
-    time.sleep(0.3)
-    servo_motor.angle = 135
-    time.sleep(0.3)
-    servo_motor.angle = 0
-"""
 
 drive_line()
