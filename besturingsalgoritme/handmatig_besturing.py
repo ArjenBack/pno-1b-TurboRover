@@ -2,6 +2,7 @@ import board
 import time
 import pwmio
 import digitalio
+import statusled as RGB
 from analogio import AnalogIn
 import random
 from adafruit_motor import servo
@@ -36,6 +37,9 @@ MINIMUM_AFWIJKWAARDE_LINKS = 24000
 MINIMUM_AFWIJKWAARDE_RECHTS = 8000
 MINIMUM_AFWIJKWAARDE_ACHTER = 14000
 
+#Initialiseren score groene torentjes (voor browserapplicatie)
+aantal_groene_torentjes = 0
+
 
 def drive_forward(speed):
     motor_links.duty_cycle = 0
@@ -51,6 +55,7 @@ def drive_forward(speed):
 def drive_backward(speed):
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
+    RGB.status_led("red") #RGB kleurt rood volgens aan-uit-cyclus
     relais_links.value = False
     time.sleep(0.1)
     relais_rechts.value = False
@@ -69,6 +74,7 @@ def drive_line():
     drive_forward(0.05)
 
     while not crossroad_found:
+        RGB.status_led("default")  # Laat RGB-LED afwisselend wit-groen branden
         time.sleep(0.1)
 
         # Behoud vorige waarde
@@ -107,6 +113,9 @@ def drive_line():
             crossroad_found = True
             motor_links.duty_cycle = 0
             motor_rechts.duty_cycle = 0
+            pick_up_torentje()
+            print("Torentje wordt opgepakt...")
+            RGB.status_led("orange") #Laat RGB-LED oranje branden volgens aan-uit-cyclus
 
 
 def turn_left():
@@ -213,4 +222,35 @@ def dance():
         time.sleep(0.5)
 
 
+<<<<<<< HEAD
 drive_line()
+=======
+
+motor_links.duty_cycle = 1000
+motor_rechts.duty_cycle = 1000
+
+dance()
+=======
+
+def pick_up_torentje(teller):
+
+    servo_motor.angle = 0
+    time.sleep(0.3)
+    servo_motor.angle = 135
+    time.sleep(0.3)
+    servo_motor.angle = 0
+    teller += 1
+
+
+drive_line()
+turn_right()
+
+"""
+with open('testfile.txt', 'r') as file:
+    tekst = file.readlines()
+    for lijn in tekst:
+        lijn.strip("\n")
+"""
+
+>>>>>>> 850643582d6a7ae8df73fa8a50c2d68d3ae9416e
+>>>>>>> abb876a8bf3a4bbfa73c766f8ae1674032329606
