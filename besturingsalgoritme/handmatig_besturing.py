@@ -9,11 +9,11 @@ from adafruit_motor import servo
 
 
 ### Defineren van de pinnen
-SPEED = 0.1
+SPEED = 0.3
 # LDR-s
-LDR_links = AnalogIn(board.GP27)
-LDR_rechts = AnalogIn(board.GP28)
-LDR_achter = AnalogIn(board.GP26)
+LDR_links = AnalogIn(board.GP26)
+LDR_rechts = AnalogIn(board.GP27)
+LDR_achter = AnalogIn(board.GP28)
 
 # Motoren
 motor_links = pwmio.PWMOut(board.GP21)
@@ -29,15 +29,15 @@ relais_rechts.value = False
 
 # Servo-motor
 
-# servo_PWM = pwmio.PWMOut(board.GP5, duty_cycle=2**15, frequency=50)
-# servo_motor = servo.Servo(servo_PWM)
+servo_PWM = pwmio.PWMOut(board.GP3, duty_cycle=2**15, frequency=50)
+servo_motor = servo.Servo(servo_PWM)
 
 # Gevoeligheden
 MINIMUM_AFWIJKWAARDE_LINKS = 24000
 MINIMUM_AFWIJKWAARDE_RECHTS = 8000
-MINIMUM_AFWIJKWAARDE_ACHTER = 14000
+MINIMUM_AFWIJKWAARDE_ACHTER = 10000
 
-#Initialiseren score groene torentjes (voor browserapplicatie)
+# Initialiseren score groene torentjes (voor browserapplicatie)
 aantal_groene_torentjes = 0
 
 
@@ -55,7 +55,7 @@ def drive_forward(speed):
 def drive_backward(speed):
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
-    RGB.status_led("red") #RGB kleurt rood volgens aan-uit-cyclus
+    RGB.status_led("red")  # RGB kleurt rood volgens aan-uit-cyclus
     relais_links.value = False
     time.sleep(0.1)
     relais_rechts.value = False
@@ -93,6 +93,7 @@ def drive_line():
                 abs(prev_LDR_achter_value - LDR_achter_value),
             )
         )
+
         # aanpassing links
         if LDR_links_value - LDR_rechts_value < -18000:
             motor_rechts.duty_cycle = int(SPEED * 65535 / 2)
@@ -105,7 +106,7 @@ def drive_line():
 
         # Zet motoren gelijk
         else:
-            drive_forward(0.5)
+            drive_forward(SPEED)
 
         # kruispunt stop
         if abs(prev_LDR_achter_value - LDR_achter_value) > MINIMUM_AFWIJKWAARDE_ACHTER:
@@ -113,9 +114,11 @@ def drive_line():
             crossroad_found = True
             motor_links.duty_cycle = 0
             motor_rechts.duty_cycle = 0
-            pick_up_torentje()
+            # pick_up_torentje()
             print("Torentje wordt opgepakt...")
-            RGB.status_led("orange") #Laat RGB-LED oranje branden volgens aan-uit-cyclus
+            RGB.status_led(
+                "orange"
+            )  # Laat RGB-LED oranje branden volgens aan-uit-cyclus
 
 
 def turn_left():
@@ -126,8 +129,8 @@ def turn_left():
     relais_links.value = False
     relais_rechts.value = True
 
-    motor_links.duty_cycle = 10000
-    motor_rechts.duty_cycle = 10000
+    motor_links.duty_cycle = int(SPEED * 65535)
+    motor_rechts.duty_cycle = int(SPEED * 65535)
 
     LDR_links_value = LDR_links.value
     LDR_rechts_value = LDR_rechts.value
@@ -147,17 +150,14 @@ def turn_left():
         LDR_rechts_value = LDR_rechts.value
         LDR_achter_value = LDR_achter.value
 
-        if (
-            black_found
-            and LDR_links_value - LDR_rechts_value < -16000
-            and time.monotonic() > (ref + 0.5)
-        ):
+        print(
+            f"LDR_links_value: {LDR_links_value}, LDR_rechts_value: {LDR_rechts_value}, LDR_achter_value: {LDR_achter_value}, diff: {LDR_links_value - LDR_rechts_value}"
+        )
+
+        if LDR_links_value - LDR_rechts_value < -10000:
             motor_links.duty_cycle = 0
             motor_rechts.duty_cycle = 0
             break
-
-        if LDR_links_value - LDR_rechts_value < -18000:
-            black_found = True
 
 
 def turn_right():
@@ -210,47 +210,27 @@ def dance():
         motor_rechts.duty_cycle = 0
         relais_links.value = True
         relais_rechts.value = False
-        motor_links.duty_cycle = 10000
-        motor_rechts.duty_cycle = 10000
+        motor_links.duty_cycle = int(SPEED * 65535)
+        motor_rechts.duty_cycle = int(SPEED * 65535)
         time.sleep(0.5)
         motor_links.duty_cycle = 0
         motor_rechts.duty_cycle = 0
         relais_links.value = False
         relais_rechts.value = True
-        motor_links.duty_cycle = 10000
-        motor_rechts.duty_cycle = 10000
+        motor_links.duty_cycle = int(SPEED * 65535)
+        motor_rechts.duty_cycle = int(SPEED * 65535)
         time.sleep(0.5)
 
 
-<<<<<<< HEAD
-drive_line()
-=======
+# def pick_up_torentje(teller):
 
-motor_links.duty_cycle = 1000
-motor_rechts.duty_cycle = 1000
-
-dance()
-=======
-
-def pick_up_torentje(teller):
-
-    servo_motor.angle = 0
-    time.sleep(0.3)
-    servo_motor.angle = 135
-    time.sleep(0.3)
-    servo_motor.angle = 0
-    teller += 1
+#    servo_motor.angle = 0
+#    time.sleep(0.3)
+#    servo_motor.angle = 135
+#    time.sleep(0.3)
+#    servo_motor.angle = 0
+#    teller += 1
 
 
 drive_line()
-turn_right()
-
-"""
-with open('testfile.txt', 'r') as file:
-    tekst = file.readlines()
-    for lijn in tekst:
-        lijn.strip("\n")
-"""
-
->>>>>>> 850643582d6a7ae8df73fa8a50c2d68d3ae9416e
->>>>>>> abb876a8bf3a4bbfa73c766f8ae1674032329606
+turn_left()
