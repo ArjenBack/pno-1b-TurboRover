@@ -8,7 +8,8 @@ import random
 from adafruit_motor import servo
 
 ### Defineren van de pinnen
-SPEED = 0.3
+SPEED = 0.4
+TSPEED = 0.33
 # LDR-s
 LDR_links = AnalogIn(board.GP26)
 LDR_rechts = AnalogIn(board.GP27)
@@ -27,6 +28,18 @@ relais_rechts = digitalio.DigitalInOut(board.GP16)
 relais_rechts.direction = digitalio.Direction.OUTPUT
 relais_rechts.value = True
 relais_rechts_default = True
+
+frontSwitch = digitalio.DigitalInOut(board.GP22)
+frontSwitch.direction = digitalio.Direction.INPUT
+
+leftSwitch = digitalio.DigitalInOut(board.GP19)
+leftSwitch.direction = digitalio.Direction.INPUT
+
+backSwitch = digitalio.DigitalInOut(board.GP18)
+backSwitch.direction = digitalio.Direction.INPUT
+
+rightSwitch = digitalio.DigitalInOut(board.GP0)
+rightSwitch.direction = digitalio.Direction.INPUT
 
 # Servo-motor
 
@@ -71,9 +84,9 @@ def drive_line():
     LDR_links_value = LDR_links.value
     LDR_rechts_value = LDR_rechts.value
     LDR_achter_value = LDR_achter.value
-
-    drive_forward(0.05)
-
+    ref = time.monotonic()
+    drive_forward(SPEED)
+    counter = 0
     while not crossroad_found:
         RGB.status_led("default")  # Laat RGB-LED afwisselend wit-groen branden
         time.sleep(0.1)
@@ -86,37 +99,49 @@ def drive_line():
         LDR_rechts_value = LDR_rechts.value
         LDR_achter_value = LDR_achter.value
 
-        print(
-            "ACHTER: prev %s, current: %s, diff: %s"
-            % (
-                prev_LDR_achter_value,
-                LDR_achter_value,
-                abs(prev_LDR_achter_value - LDR_achter_value),
-            )
-        )
+        # print(
+        #    "ACHTER: prev %s, current: %s, diff: %s"
+        #     % (
+        #         normalizeAchter(prev_LDR_achter_value),
+        #         normalizeAchter(LDR_achter_value),
+        #         abs(
+        #             normalizeAchter(LDR_achter_value)
+        #             - normalizeAchter(prev_LDR_achter_value)
+        #         ),
+        #     )
+        # )
+
+        # print(
+        #     "LINKS: %s, RECHTS: %s, DIFF: %s"
+        #     % (
+        #         normalizeLinks(LDR_links_value),
+        #         normalizeRechts(LDR_rechts_value),
+        #         (normalizeLinks(LDR_links_value) - normalizeRechts(LDR_rechts_value)),
+        #     )
+        # )
+
+        counter += 1
 
         # aanpassing links
-        if LDR_links_value - LDR_rechts_value < -18000:
+        if normalizeLinks(LDR_links_value) - normalizeRechts(LDR_rechts_value) < -0.40:
             motor_rechts.duty_cycle = int(SPEED * 65535 / 2)
             motor_links.duty_cycle = int(SPEED * 65535)
         # aanpassing rechts
-        elif LDR_links_value - LDR_rechts_value > 18000:
+        elif normalizeLinks(LDR_links_value) - normalizeRechts(LDR_rechts_value) > 0.40:
             motor_links.duty_cycle = int(SPEED * 65535 / 2)
             motor_rechts.duty_cycle = int(SPEED * 65535)
         # Zet motoren gelijk
         else:
             drive_forward(SPEED)
         # kruispunt stop
-        if abs(prev_LDR_achter_value - LDR_achter_value) > MINIMUM_AFWIJKWAARDE_ACHTER:
+        if (
+            normalizeAchter(LDR_achter_value) - normalizeAchter(prev_LDR_achter_value)
+        ) > 0.25:
             print("Klaar om te draaien, waar zijn die handjes")
             crossroad_found = True
             motor_links.duty_cycle = 0
             motor_rechts.duty_cycle = 0
             # pick_up_torentje()
-            print("Torentje wordt opgepakt...")
-            RGB.status_led(
-                "orange"
-            )  # Laat RGB-LED oranje branden volgens aan-uit-cyclus
 
 
 def turn_left():
@@ -126,14 +151,16 @@ def turn_left():
     relais_links.value = not relais_links_default
     relais_rechts.value = relais_rechts_default
 
-    motor_links.duty_cycle = int(SPEED * 65535)
-    motor_rechts.duty_cycle = int(SPEED * 65535)
+    motor_links.duty_cycle = int(TSPEED * 65535)
+    motor_rechts.duty_cycle = int(TSPEED * 65535)
 
     LDR_links_value = LDR_links.value
     LDR_rechts_value = LDR_rechts.value
     LDR_achter_value = LDR_achter.value
 
     ref = time.monotonic()
+
+    crossroad_found = False
 
     while True:
 
@@ -146,32 +173,52 @@ def turn_left():
         LDR_rechts_value = LDR_rechts.value
         LDR_achter_value = LDR_achter.value
 
-        print(
-            f"LDR_links_value: {LDR_links_value}, LDR_rechts_value: {LDR_rechts_value}, LDR_achter_value: {LDR_achter_value}, diff: {LDR_links_value - LDR_rechts_value}"
-        )
+        if (
+            normalizeLinks(LDR_links_value) - normalizeRechts(LDR_rechts_value) > 0.8
+            and time.monotonic() - ref > 0.5
+        ):
+            crossroad_found = True
+            motor_links.duty_cycle = int(TSPEED * 65535)
+            motor_rechts.duty_cycle = int(TSPEED * 65535)
+            # break
 
-        if LDR_links_value - LDR_rechts_value < -10000:
+        print(
+            normalizeLinks(LDR_links_value) - normalizeRechts(LDR_rechts_value),
+            normalizeLinks(LDR_links_value),
+            normalizeRechts(LDR_rechts_value),
+            normalizeLinks(LDR_links_value) - normalizeRechts(LDR_rechts_value) > 0.8,
+            crossroad_found,
+            normalizeLinks(LDR_links_value) > 0.25,
+        )
+        if crossroad_found and normalizeLinks(LDR_links_value) > 0.25:
             motor_links.duty_cycle = 0
             motor_rechts.duty_cycle = 0
             break
+    motor_links.duty_cycle = 0
+    motor_rechts.duty_cycle = 0
 
 
 def turn_right():
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
+
     relais_links.value = relais_links_default
     relais_rechts.value = not relais_rechts_default
-    motor_links.duty_cycle = 15000
-    motor_rechts.duty_cycle = 15000
+
+    motor_links.duty_cycle = int(TSPEED * 65535)
+    motor_rechts.duty_cycle = int(TSPEED * 65535)
+
     LDR_links_value = LDR_links.value
     LDR_rechts_value = LDR_rechts.value
     LDR_achter_value = LDR_achter.value
 
     ref = time.monotonic()
-    black_found = False
+
+    crossroad_found = False
+
     while True:
 
-        time.sleep(0.05)
+        time.sleep(0.02)
         prev_LDR_achter_value = LDR_achter_value
         prev_LDR_links_value = LDR_links_value
         prev_LDR_rechts_value = LDR_rechts_value
@@ -180,23 +227,27 @@ def turn_right():
         LDR_rechts_value = LDR_rechts.value
         LDR_achter_value = LDR_achter.value
 
-        print(
-            "links: %s, rechts: %s, diff: %s"
-            % (LDR_links_value, LDR_rechts_value, LDR_links_value - LDR_rechts_value)
-        )
-
         if (
-            black_found
-            and LDR_links_value - LDR_rechts_value > 16000
-            and time.monotonic() > (ref + 0.5)
+            normalizeLinks(LDR_links_value) - normalizeRechts(LDR_rechts_value) < -0.8
+            and time.monotonic() - ref > 0.5
         ):
+            crossroad_found = True
+            break
+        print(
+            normalizeLinks(LDR_links_value) - normalizeRechts(LDR_rechts_value),
+            normalizeLinks(LDR_links_value),
+            normalizeRechts(LDR_rechts_value),
+            normalizeLinks(LDR_links_value) - normalizeRechts(LDR_rechts_value) < -0.8,
+            crossroad_found,
+            normalizeLinks(LDR_rechts_value) > 0.25,
+        )
+        if crossroad_found and normalizeRechts(LDR_rechts_value) > 0.25:
             motor_links.duty_cycle = 0
             motor_rechts.duty_cycle = 0
-            print("stopped")
             break
-        if LDR_links_value - LDR_rechts_value < -18000:
-            black_found = True
-            print("Found black")
+
+    motor_links.duty_cycle = 0
+    motor_rechts.duty_cycle = 0
 
 
 def dance():
@@ -227,11 +278,7 @@ def pick_up_torentje():
     servo_motor.angle = 0
 
 
-"""
-microswitch = digitalio.DigitalInOut(board.GP0)
-microswitch.direction = digitalio.Direction.OUTPUT
-
-def onderzoek_ondergrond():
+def calibrate():
     op_knop_gedrukt = False
 
     min_links = 65535
@@ -240,6 +287,7 @@ def onderzoek_ondergrond():
     max_links = 0
     max_rechts = 0
     max_achter = 0
+
     LDR_links_value = LDR_links.value
     LDR_rechts_value = LDR_rechts.value
     LDR_achter_value = LDR_achter.value
@@ -258,8 +306,8 @@ def onderzoek_ondergrond():
         LDR_rechts_value = LDR_rechts.value
         LDR_achter_value = LDR_achter.value
         print(
-            'linksvoor: %s rechtsvoor: %s achter: %s' %
-            (LDR_links_value, LDR_rechts_value, LDR_achter_value)
+            "linksvoor: %s rechtsvoor: %s achter: %s"
+            % (LDR_links_value, LDR_rechts_value, LDR_achter_value)
         )
 
         # houd de kleinste en grootste waarde bij
@@ -279,18 +327,54 @@ def onderzoek_ondergrond():
             min_achter = LDR_achter_value
 
         # stop als er op de knop gedrukt wordt
-        if microswitch.value == True:
+        if frontSwitch.value:
             op_knop_gedrukt = True
             print(
-                'max links: %s max rechts: %s max achter: %s min links: %s min rechts: %s min achter: %s' %
-                (max_links, max_rechts, max_achter, min_links, min_rechts, min_achter)
+                "max links: %s max rechts: %s max achter: %s min links: %s min rechts: %s min achter: %s"
+                % (max_links, max_rechts, max_achter, min_links, min_rechts, min_achter)
             )
-        # bereken de procentuele afwijking
-        LDR_links_procent = (LDR_links_value - min_links) / (max_links - min_links)
-        LDR_rechts_procent = (LDR_rechts_value - min_rechts) / (max_rechts - min_rechts)
-        LDR_achter_procent = (LDR_achter_value - min_achter) / (max_achter - min_achter)
-    return LDR_links_procent, LDR_rechts_procent, LDR_achter_procent
+    return min_links, max_links, min_rechts, max_rechts, min_achter, max_achter
+
+
+MIN_LINKS = 0
+MAX_LINKS = 100
+
+MIN_RECHTS = 0
+MAX_RECHTS = 100
+
+MIN_ACHTER = 0
+MAX_ACHTER = 100
+
+
+def normalizeLinks(value):
+    return (value - MIN_LINKS) / (MAX_LINKS - MIN_LINKS)
+
+
+def normalizeRechts(value):
+    return (value - MIN_RECHTS) / (MAX_RECHTS - MIN_RECHTS)
+
+
+def normalizeAchter(value):
+    return (value - MIN_ACHTER) / (MAX_ACHTER - MIN_ACHTER)
+
+
+"""
+while True:
+    if frontSwitch.value:
+        print("start")
+        time.sleep(3)
+        break
 """
 
-drive_line()
-pick_up_torentje()
+MIN_LINKS, MAX_LINKS, MIN_RECHTS, MAX_RECHTS, MIN_ACHTER, MAX_ACHTER = (
+    28038,
+    43850,
+    21269,
+    39113,
+    14147,
+    27830,
+)
+
+for i in range(4):
+    drive_line()
+    turn_right()

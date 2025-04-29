@@ -9,7 +9,7 @@ LED_BLUE = pwmio.PWMOut(board.GP14)
 
 
 def status_led(state="default"):
-    print(state)
+    # print(state)
     if state == "default":
         # status led wit-groen (volgens functie)
         ref = time.monotonic()
