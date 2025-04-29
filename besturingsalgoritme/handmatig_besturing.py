@@ -21,14 +21,16 @@ motor_rechts = pwmio.PWMOut(board.GP20)
 relais_links = digitalio.DigitalInOut(board.GP17)
 relais_links.direction = digitalio.Direction.OUTPUT
 relais_links.value = False
+relais_links_default = False
 
 relais_rechts = digitalio.DigitalInOut(board.GP16)
 relais_rechts.direction = digitalio.Direction.OUTPUT
-relais_rechts.value = False
+relais_rechts.value = True
+relais_rechts_default = True
 
 # Servo-motor
 
-servo_PWM = pwmio.PWMOut(board.GP3, duty_cycle=2 ** 15, frequency=50)
+servo_PWM = pwmio.PWMOut(board.GP3, duty_cycle=2**15, frequency=50)
 servo_motor = servo.Servo(servo_PWM)
 
 # Gevoeligheden
@@ -44,8 +46,8 @@ def drive_forward(speed):
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
 
-    relais_links.value = True
-    relais_rechts.value = True
+    relais_links.value = relais_links_default
+    relais_rechts.value = relais_rechts_default
 
     motor_links.duty_cycle = int(speed * 65000)
     motor_rechts.duty_cycle = int(speed * 65000)
@@ -121,8 +123,8 @@ def turn_left():
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
 
-    relais_links.value = False
-    relais_rechts.value = True
+    relais_links.value = not relais_links_default
+    relais_rechts.value = relais_rechts_default
 
     motor_links.duty_cycle = int(SPEED * 65535)
     motor_rechts.duty_cycle = int(SPEED * 65535)
@@ -132,7 +134,6 @@ def turn_left():
     LDR_achter_value = LDR_achter.value
 
     ref = time.monotonic()
-    black_found = False
 
     while True:
 
@@ -158,8 +159,8 @@ def turn_left():
 def turn_right():
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
-    relais_links.value = True
-    relais_rechts.value = False
+    relais_links.value = relais_links_default
+    relais_rechts.value = not relais_rechts_default
     motor_links.duty_cycle = 15000
     motor_rechts.duty_cycle = 15000
     LDR_links_value = LDR_links.value
@@ -185,9 +186,9 @@ def turn_right():
         )
 
         if (
-                black_found
-                and LDR_links_value - LDR_rechts_value > 16000
-                and time.monotonic() > (ref + 0.5)
+            black_found
+            and LDR_links_value - LDR_rechts_value > 16000
+            and time.monotonic() > (ref + 0.5)
         ):
             motor_links.duty_cycle = 0
             motor_rechts.duty_cycle = 0
@@ -216,14 +217,15 @@ def dance():
         time.sleep(0.5)
 
 
-# def pick_up_torentje(teller):
+def pick_up_torentje():
+    servo_motor.angle = 0
+    time.sleep(0.7)
+    print("hoog")
+    servo_motor.angle = 140
+    time.sleep(0.3)
+    print("laag")
+    servo_motor.angle = 0
 
-#    servo_motor.angle = 0
-#    time.sleep(0.3)
-#    servo_motor.angle = 135
-#    time.sleep(0.3)
-#    servo_motor.angle = 0
-#    teller += 1
 
 """
 microswitch = digitalio.DigitalInOut(board.GP0)
@@ -291,4 +293,4 @@ def onderzoek_ondergrond():
 """
 
 drive_line()
-turn_left()
+pick_up_torentje()

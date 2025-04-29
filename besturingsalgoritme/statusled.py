@@ -3,12 +3,13 @@ import board
 import pwmio
 import time
 
-LED_RED = pwmio.PWMOut(board.GP15)
-LED_GREEN = pwmio.PWMOut(board.GP14)
-LED_BLUE = pwmio.PWMOut(board.GP13)
+LED_RED = pwmio.PWMOut(board.GP13)
+LED_GREEN = pwmio.PWMOut(board.GP15)
+LED_BLUE = pwmio.PWMOut(board.GP14)
 
 
 def status_led(state="default"):
+    print(state)
     if state == "default":
         # status led wit-groen (volgens functie)
         ref = time.monotonic()
@@ -30,7 +31,7 @@ def status_led(state="default"):
         value = math.ceil(math.sin(ref))
 
         LED_RED.duty_cycle = 65535
-        LED_GREEN.duty_cycle = int(0.64 * 65535)
+        LED_GREEN.duty_cycle = int(0.1 * 65535)
         LED_BLUE.duty_cycle = 0
 
     if state == "red":
