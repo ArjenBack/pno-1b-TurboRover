@@ -9,7 +9,7 @@ from adafruit_motor import servo
 
 ### Defineren van de pinnen
 SPEED = 0.4
-TSPEED = 0.33
+TSPEED = 0.28
 # LDR-s
 LDR_links = AnalogIn(board.GP26)
 LDR_rechts = AnalogIn(board.GP27)
@@ -89,7 +89,7 @@ def drive_line():
     counter = 0
     while not crossroad_found:
         RGB.status_led("default")  # Laat RGB-LED afwisselend wit-groen branden
-        time.sleep(0.1)
+        time.sleep(0.05)
 
         # Behoud vorige waarde
         prev_LDR_achter_value = LDR_achter_value
@@ -145,6 +145,7 @@ def drive_line():
 
 
 def turn_left():
+    RGB.status_led("blue")
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
 
@@ -178,8 +179,6 @@ def turn_left():
             and time.monotonic() - ref > 0.5
         ):
             crossroad_found = True
-            motor_links.duty_cycle = int(TSPEED * 65535)
-            motor_rechts.duty_cycle = int(TSPEED * 65535)
             # break
 
         print(
@@ -199,6 +198,7 @@ def turn_left():
 
 
 def turn_right():
+    RGB.status_led("blue")
     motor_links.duty_cycle = 0
     motor_rechts.duty_cycle = 0
 
@@ -375,6 +375,27 @@ MIN_LINKS, MAX_LINKS, MIN_RECHTS, MAX_RECHTS, MIN_ACHTER, MAX_ACHTER = (
     27830,
 )
 
-for i in range(4):
-    drive_line()
-    turn_right()
+while True:
+    if backSwitch.value:
+        time.sleep(1)
+        break
+
+drive_line()
+turn_left()
+drive_line()
+drive_line()
+turn_right()
+drive_line()
+drive_line()
+turn_left()
+drive_line()
+drive_line()
+turn_left()
+drive_line()
+drive_line()
+turn_left()
+drive_line()
+drive_line()
+drive_line()
+drive_line()
+drive_line()
