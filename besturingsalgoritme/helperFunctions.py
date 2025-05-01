@@ -12,7 +12,6 @@ from adafruit_motor import servo
 SPEED = 0.4
 TURN_SPEED = 0.28
 
-
 # ------------------------------------------------------------------------------
 #                           HARDWARE INITIALIZATION
 # ------------------------------------------------------------------------------
@@ -30,12 +29,12 @@ MOTOR_RIGHT = pwmio.PWMOut(board.GP20)
 RELAIS_LEFT = digitalio.DigitalInOut(board.GP17)
 RELAIS_LEFT.direction = digitalio.Direction.OUTPUT
 RELAIS_LEFT.value = False
-relais_left_default = False
+RELAIS_LEFT_DEFAULT = False
 
 RELAIS_RIGHT = digitalio.DigitalInOut(board.GP16)
 RELAIS_RIGHT.direction = digitalio.Direction.OUTPUT
 RELAIS_RIGHT.value = True
-relais_right_default = True
+RELAIS_RIGHT_DEFAULT = True
 
 # Limit switches for collision detection
 FRONT_SWITCH = digitalio.DigitalInOut(board.GP22)
@@ -123,8 +122,6 @@ def calibrate():
         Tuple of min and max values of each sensor
         (minLeft, maxLeft, minRight,maxRight, minBack, maxRear)
     """
-    op_knop_gedrukt = False
-
     MIN_LEFT = 65535
     MIN_RIGHT = 65535
     MIN_REAR = 65535
@@ -132,42 +129,45 @@ def calibrate():
     MAX_RIGHT = 0
     MAX_REAR = 0
 
-    LDR_left_value = LDR_LEFT.value
-    LDR_right_value = LDR_RIGHT.value
-    LDR_rear_value = LDR_REAR.value
+    ldr_left_value = LDR_LEFT.value
+    ldr_right_value = LDR_RIGHT.value
+    ldr_rear_value = LDR_REAR.value
 
-    while not op_knop_gedrukt:
+    while True:
+        time.sleep(0.05)
 
-        time.sleep(0.1)
+        ldr_left_value = LDR_LEFT.value
+        ldr_right_value = LDR_RIGHT.value
+        ldr_rear_value = LDR_REAR.value
 
-        LDR_left_value = LDR_LEFT.value
-        LDR_right_value = LDR_RIGHT.value
-        LDR_rear_value = LDR_REAR.value
+        if ldr_left_value > MAX_LEFT:
+            MAX_LEFT = ldr_left_value
 
-        if LDR_left_value > MAX_LEFT:
-            MAX_LEFT = LDR_left_value
-        elif LDR_left_value < MIN_LEFT:
-            MIN_LEFT = LDR_left_value
+        elif ldr_left_value < MIN_LEFT:
+            MIN_LEFT = ldr_left_value
 
-        if LDR_right_value > MAX_RIGHT:
-            MAX_RIGHT = LDR_right_value
-        elif LDR_right_value < MIN_RIGHT:
-            MIN_RIGHT = LDR_right_value
+        if ldr_right_value > MAX_RIGHT:
+            MAX_RIGHT = ldr_right_value
 
-        if LDR_rear_value > MAX_REAR:
-            MAX_REAR = LDR_rear_value
-        elif LDR_rear_value < MIN_REAR:
-            MIN_REAR = LDR_rear_value
+        elif ldr_right_value < MIN_RIGHT:
+            MIN_RIGHT = ldr_right_value
+
+        if ldr_rear_value > MAX_REAR:
+            MAX_REAR = ldr_rear_value
+
+        elif ldr_rear_value < MIN_REAR:
+            MIN_REAR = ldr_rear_value
 
         if FRONT_SWITCH.value:
-            op_knop_gedrukt = True
+            break
+
     return MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR
 
 
 # -----------------------------------------------------------------------------
 #                              MOVEMENT FUNCTIONS
 # -----------------------------------------------------------------------------
-def drive_line():
+def driveLine():
     """
     Drive along line until a crossroad is detected.
 
@@ -175,70 +175,73 @@ def drive_line():
     Stops when a crossroad is detected by the rear sensor.
     """
 
-    LDR_left_value = LDR_LEFT.value
-    LDR_right_value = LDR_RIGHT.value
-    LDR_rear_value = LDR_REAR.value
+    ldr_left_value = LDR_LEFT.value
+    ldr_right_value = LDR_RIGHT.value
+    ldr_rear_value = LDR_REAR.value
 
     # Set motor direction
-    RELAIS_LEFT.value = relais_left_default
-    RELAIS_RIGHT.value = relais_right_default
+    RELAIS_LEFT.value = RELAIS_LEFT_DEFAULT
+    RELAIS_RIGHT.value = RELAIS_RIGHT_DEFAULT
 
     # Start motors
     MOTOR_LEFT.duty_cycle = int(SPEED * 65000)
     MOTOR_RIGHT.duty_cycle = int(SPEED * 65000)
 
     while True:
-        status_led("default")
+        statusLed("default")
         time.sleep(0.05)
 
-        prev_LDR_rear_value = LDR_rear_value
+        prev_ldr_rear_value = ldr_rear_value
 
-        LDR_left_value = LDR_LEFT.value
-        LDR_right_value = LDR_RIGHT.value
-        LDR_rear_value = LDR_REAR.value
+        ldr_left_value = LDR_LEFT.value
+        ldr_right_value = LDR_RIGHT.value
+        ldr_rear_value = LDR_REAR.value
 
         # Line following logic
-        if normalizeLeft(LDR_left_value) - normalizeRight(LDR_right_value) < -0.40:
+        if normalizeLeft(ldr_left_value) - normalizeRight(ldr_right_value) < -0.40:
             # Line is to the right, adjust steering
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535 / 2)
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535)
-        elif normalizeLeft(LDR_left_value) - normalizeRight(LDR_right_value) > 0.40:
+
+        elif normalizeLeft(ldr_left_value) - normalizeRight(ldr_right_value) > 0.40:
             # Line is to the left, adjust steering
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535 / 2)
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535)
+
         else:
             # Line is centered, go straight
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535)
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535)
 
         # Detect crossroads by significant change in rear sensor
-        if (normalizeRear(LDR_rear_value) - normalizeRear(prev_LDR_rear_value)) > 0.25:
+        if (normalizeRear(ldr_rear_value) - normalizeRear(prev_ldr_rear_value)) > 0.25:
             break
+
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
 
 
-def TURN_LEFT():
+def turnLeft():
     """
     Make a left turn at a crossroad
 
     Reverses the left motor direction and runs both motors until
     the rover has completed a left turn.
     """
-    status_led("blue")
+    statusLed("blue")
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
 
     # Set motor direction to left turn
-    RELAIS_LEFT.value = not relais_left_default
-    RELAIS_RIGHT.value = relais_right_default
+    RELAIS_LEFT.value = not RELAIS_LEFT_DEFAULT
+    RELAIS_RIGHT.value = RELAIS_RIGHT_DEFAULT
 
     # Start motors
     MOTOR_LEFT.duty_cycle = int(TURN_SPEED * 65535)
     MOTOR_RIGHT.duty_cycle = int(TURN_SPEED * 65535)
 
-    LDR_left_value = LDR_LEFT.value
-    LDR_right_value = LDR_RIGHT.value
+    ldr_left_value = LDR_LEFT.value
+    ldr_right_value = LDR_RIGHT.value
 
     ref = time.monotonic()
 
@@ -248,18 +251,18 @@ def TURN_LEFT():
 
         time.sleep(0.05)
 
-        LDR_left_value = LDR_LEFT.value
-        LDR_right_value = LDR_RIGHT.value
+        ldr_left_value = LDR_LEFT.value
+        ldr_right_value = LDR_RIGHT.value
 
         # Check if the rover has turned enough
         if (
-            normalizeLeft(LDR_left_value) - normalizeRight(LDR_right_value) > 0.8
+            normalizeLeft(ldr_left_value) - normalizeRight(ldr_right_value) > 0.8
             and time.monotonic() - ref > 0.5
         ):
             crossroad_found = True
 
         # Stop when the rover detects the line again
-        if crossroad_found and normalizeLeft(LDR_left_value) > 0.25:
+        if crossroad_found and normalizeLeft(ldr_left_value) > 0.25:
             MOTOR_LEFT.duty_cycle = 0
             MOTOR_RIGHT.duty_cycle = 0
             break
@@ -268,27 +271,27 @@ def TURN_LEFT():
     MOTOR_RIGHT.duty_cycle = 0
 
 
-def TURN_RIGHT():
+def turnRight():
     """
     Make a right turn at a crossroad.
 
     Reverses the right motor directions and runs both motors until
     the rover has completed a right turn.
     """
-    status_led("blue")
+    statusLed("blue")
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
 
     # Set motor directions for right turn
-    RELAIS_LEFT.value = relais_left_default
-    RELAIS_RIGHT.value = not relais_right_default
+    RELAIS_LEFT.value = RELAIS_LEFT_DEFAULT
+    RELAIS_RIGHT.value = not RELAIS_RIGHT_DEFAULT
 
     # Start motors
     MOTOR_LEFT.duty_cycle = int(TURN_SPEED * 65535)
     MOTOR_RIGHT.duty_cycle = int(TURN_SPEED * 65535)
 
-    LDR_left_value = LDR_LEFT.value
-    LDR_right_value = LDR_RIGHT.value
+    ldr_left_value = LDR_LEFT.value
+    ldr_right_value = LDR_RIGHT.value
 
     ref = time.monotonic()
 
@@ -298,19 +301,19 @@ def TURN_RIGHT():
 
         time.sleep(0.02)
 
-        LDR_left_value = LDR_LEFT.value
-        LDR_right_value = LDR_RIGHT.value
+        ldr_left_value = LDR_LEFT.value
+        ldr_right_value = LDR_RIGHT.value
 
         # Check if the rover has turned enough
         if (
-            normalizeLeft(LDR_left_value) - normalizeRight(LDR_right_value) < -0.8
+            normalizeLeft(ldr_left_value) - normalizeRight(ldr_right_value) < -0.8
             and time.monotonic() - ref > 0.5
         ):
             crossroad_found = True
             break
 
         # Stop when the rover detects the line again
-        if crossroad_found and normalizeRight(LDR_right_value) > 0.25:
+        if crossroad_found and normalizeRight(ldr_right_value) > 0.25:
             MOTOR_LEFT.duty_cycle = 0
             MOTOR_RIGHT.duty_cycle = 0
             break
@@ -319,7 +322,7 @@ def TURN_RIGHT():
     MOTOR_RIGHT.duty_cycle = 0
 
 
-def pick_up_tower():
+def pickUpTower():
     """
     Control the servo to pick up a tower object.
 
@@ -336,7 +339,7 @@ def pick_up_tower():
 # -----------------------------------------------------------------------------
 #                       STATUS INDICATION FUNCTIONS
 # -----------------------------------------------------------------------------
-def status_led(state="default"):
+def statusLed(state="default"):
     """
     Control the RGB LED to indicate different states.
 
