@@ -49,6 +49,9 @@ REAR_SWITCH.direction = digitalio.Direction.INPUT
 RIGHT_SWITCH = digitalio.DigitalInOut(board.GP0)
 RIGHT_SWITCH.direction = digitalio.Direction.INPUT
 
+# collision detected
+collision_detected = FRONT_SWITCH.value or LEFT_SWITCH.value of REAR_SWITCH.value 
+
 # Servo for pickup mechanism
 SERVO_PWM = pwmio.PWMOut(board.GP3, duty_cycle=2**15, frequency=50)
 SERVO_MOTOR = servo.Servo(SERVO_PWM)
@@ -187,7 +190,7 @@ def driveLine():
     MOTOR_LEFT.duty_cycle = int(SPEED * 65000)
     MOTOR_RIGHT.duty_cycle = int(SPEED * 65000)
 
-    while True:
+    while not collision_detected
         statusLed("default")
         time.sleep(0.05)
 
@@ -247,7 +250,7 @@ def turnLeft():
 
     crossroad_found = False
 
-    while True:
+    while not collision_detected:
 
         time.sleep(0.05)
 
@@ -297,7 +300,7 @@ def turnRight():
 
     crossroad_found = False
 
-    while True:
+    while not collision_detected:
 
         time.sleep(0.02)
 
