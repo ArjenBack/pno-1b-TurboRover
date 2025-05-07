@@ -54,9 +54,9 @@ SERVO_PWM = pwmio.PWMOut(board.GP3, duty_cycle=2**15, frequency=50)
 SERVO_MOTOR = servo.Servo(SERVO_PWM)
 
 # LED for status indication
-LED_RED = pwmio.PWMOut(board.GP13)
-LED_GREEN = pwmio.PWMOut(board.GP15)
-LED_BLUE = pwmio.PWMOut(board.GP14)
+LED_RED = pwmio.PWMOut(board.GP15)
+LED_GREEN = pwmio.PWMOut(board.GP14)
+LED_BLUE = pwmio.PWMOut(board.GP13)
 
 # Calibration defaults
 MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR = (
@@ -188,7 +188,6 @@ def driveLine():
     MOTOR_RIGHT.duty_cycle = int(SPEED * 65000)
 
     while True:
-        statusLed("default")
         time.sleep(0.05)
 
         prev_ldr_rear_value = ldr_rear_value
@@ -228,7 +227,6 @@ def turnLeft():
     Reverses the left motor direction and runs both motors until
     the rover has completed a left turn.
     """
-    statusLed("blue")
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
 
@@ -278,7 +276,6 @@ def turnRight():
     Reverses the right motor directions and runs both motors until
     the rover has completed a right turn.
     """
-    statusLed("blue")
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
 
@@ -329,11 +326,11 @@ def pickUpTower():
     Moves the servo to 0 degrees (lowered position), waits,
     then moves to 140 degrees (raised position) to grab the object.
     """
-    SERVO_MOTOR.angle = 0
+    print("pickup")
+    SERVO_MOTOR.angle = 145
     time.sleep(0.7)
-    SERVO_MOTOR.angle = 140
-    time.sleep(0.3)
     SERVO_MOTOR.angle = 0
+    time.sleep(1)
 
 
 # -----------------------------------------------------------------------------

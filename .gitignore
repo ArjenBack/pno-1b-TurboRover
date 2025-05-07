@@ -174,4 +174,5 @@ cython_debug/
 .pypirc
 
 # extra
+output.txt
 pathfinding/output.txt
