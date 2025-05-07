@@ -1,4 +1,4 @@
-def parse_output(path, greens, output_file="robot_actions.txt"):
+def parse_output(path, greens, output_file="output.txt"):
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     currentDirection = 0
 
