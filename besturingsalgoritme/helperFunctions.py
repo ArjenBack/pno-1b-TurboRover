@@ -190,7 +190,8 @@ def driveLine():
     while True:
         time.sleep(0.05)
 
-        prev_ldr_rear_value = ldr_rear_value
+        if FRONT_SWITCH.value or LEFT_SWITCH.value or RIGHT_SWITCH.value:
+            return 1
 
         ldr_left_value = LDR_LEFT.value
         ldr_right_value = LDR_RIGHT.value
@@ -218,6 +219,7 @@ def driveLine():
 
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
+    return 0
 
 
 def turnLeft():
@@ -249,6 +251,9 @@ def turnLeft():
 
         time.sleep(0.05)
 
+        if FRONT_SWITCH.value or LEFT_SWITCH.value or RIGHT_SWITCH.value:
+            return 1
+
         ldr_left_value = LDR_LEFT.value
         ldr_right_value = LDR_RIGHT.value
 
@@ -267,6 +272,7 @@ def turnLeft():
 
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
+    return 0
 
 
 def turnRight():
@@ -298,6 +304,9 @@ def turnRight():
 
         time.sleep(0.02)
 
+        if FRONT_SWITCH.value or LEFT_SWITCH.value or RIGHT_SWITCH.value:
+            return 1
+
         ldr_left_value = LDR_LEFT.value
         ldr_right_value = LDR_RIGHT.value
 
@@ -317,9 +326,10 @@ def turnRight():
 
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
+    return 0
 
 
-def pickUpTower():
+def pickUpTower(slp):
     """
     Control the servo to pick up a tower object.
 
@@ -327,10 +337,9 @@ def pickUpTower():
     then moves to 140 degrees (raised position) to grab the object.
     """
     print("pickup")
-    SERVO_MOTOR.angle = 145
-    time.sleep(0.7)
     SERVO_MOTOR.angle = 0
-    time.sleep(1)
+    time.sleep(slp)
+    SERVO_MOTOR.angle = 160
 
 
 # -----------------------------------------------------------------------------

@@ -16,27 +16,34 @@ def main():
 
     index = 0
 
-    status = "default"
+    ledStatus = "default"
 
     while index < len(actions):
         action_split = actions[index].split()
         action = action_split[0]
-
+        state = 0
         if "garage" in action_split:
-            status = "blue"
+            ledStatus = "blue"
 
         if action == "forward":
-            statusLed(status)
-            driveLine()
+            statusLed(ledStatus)
+            state = driveLine()
         elif action == "left":
-            statusLed(status)
-            turnLeft()
+            statusLed(ledStatus)
+            state = turnLeft()
         elif action == "right":
-            statusLed(status)
-            turnRight()
+            statusLed(ledStatus)
+            state = turnRight()
         elif action == "pickup":
             statusLed("orange")
-            pickUpTower()
+        #        pickUpTower()
+
+        if state == 1:
+            statusLed("red")
+            index -= 1
+            while True:
+                if REAR_SWITCH.value:
+                    break
 
         SERVO_MOTOR.angle = 145
         time.sleep(1)
@@ -49,6 +56,4 @@ def main():
 
 while True:
     if REAR_SWITCH.value:
-        break
-
-main()
+        pickUpTower(0.30)
