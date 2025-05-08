@@ -346,7 +346,7 @@ def autoCalibrate():
 #                              MOVEMENT FUNCTIONS
 # -----------------------------------------------------------------------------
 def driveLine(
-    min_left, max_left, min_right, max_right, min_rear, max_rear, pickup=False
+    min_left, max_left, min_right, max_right, min_rear, max_rear, pickup=False, next_step
 ):
     """
     Drive along line until a crossroad is detected.
@@ -354,7 +354,7 @@ def driveLine(
     Use LDR sensors to follow a line, adjusting motor speed to stay centered.
     Stops when a crossroad is detected by the rear sensor.
     """
-
+    SPEED = 0.5
     ldr_left_value = LDR_LEFT.value
     ldr_right_value = LDR_RIGHT.value
     ldr_rear_value = LDR_REAR.value
@@ -417,12 +417,21 @@ def driveLine(
             # Line is to the left, adjust steering
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535 / 2)
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535)
-
+            
+        if ( 
+            normalize(min_left, max_left, ldr_left_value) > 0.5
+            and normalize(min_right, max_right, ldr_right_value) > 0.5
+        ): 
+            x = time.monotonic()
+            MOTOR_LEFT.duty_cycle = int((1 - 0.4 * x) * SPEED * 65535)
+            MOTOR_RIGHT.duty_cycle = int((1 - 0.4 * x) * SPEED * 65535)
+        
         else:
             # Line is centered, go straight
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535)
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535)
 
+            
         # Detect crossroads by significant change in rear sensor
         if (
             normalize(min_rear, max_rear, ldr_rear_value)
@@ -452,7 +461,7 @@ def turnLeft(min_left, max_left, min_right, max_right, min_rear, max_rear):
     RELAIS_LEFT.value = not RELAIS_LEFT_DEFAULT
     RELAIS_RIGHT.value = RELAIS_RIGHT_DEFAULT
 
-    # Start motors
+    # start motors
     MOTOR_LEFT.duty_cycle = int(TURN_SPEED * 65535)
     MOTOR_RIGHT.duty_cycle = int(TURN_SPEED * 65535)
 
@@ -481,12 +490,19 @@ def turnLeft(min_left, max_left, min_right, max_right, min_rear, max_rear):
             and time.monotonic() - ref > 0.5
         ):
             crossroad_found = True
+            MOTOR_LEFT.duty_cycle = int(0.5 * TURN_SPEED * 65535)
+            MOTOR_RIGHT.duty_cycle = int(0.5 * TURN_SPEED * 65535)
+
 
         # Stop when the rover detects the line again
         if crossroad_found and normalize(min_left, max_left, ldr_left_value) > 0.25:
             MOTOR_LEFT.duty_cycle = 0
             MOTOR_RIGHT.duty_cycle = 0
             break
+
+        else: 
+            MOTOR_LEFT.duty_cycle = int(TURN_SPEED * 65535)
+            MOTOR_RIGHT.duty_cycle = int(TURN_SPEED * 65535)
 
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
@@ -603,7 +619,7 @@ def statusLed(state="default"):
 
     if state == "orange":
         ref = time.monotonic()
-        value = math.ceil(math.sin(ref))
+        value = math.ceil(math.sin(0.5 * ref))
 
         LED_RED.duty_cycle = 65535
         LED_GREEN.duty_cycle = int(0.1 * 65535)
@@ -611,7 +627,7 @@ def statusLed(state="default"):
 
     if state == "red":
         ref = time.monotonic()
-        value = math.ceil(math.sin(ref))
+        value = math.ceil(math.sin(0.5 * ref))
 
         LED_RED.duty_cycle = int(value * 65535)
         LED_GREEN.duty_cycle = 0
