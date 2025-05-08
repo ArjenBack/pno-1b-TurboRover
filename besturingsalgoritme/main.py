@@ -10,7 +10,6 @@ def main():
     index = 0
 
     ledStatus = "default"
-
     while index < len(actions):
         action_split = actions[index].split()
         action = action_split[0]
@@ -29,6 +28,7 @@ def main():
                     MAX_RIGHT,
                     MIN_REAR,
                     MAX_REAR,
+                    ledStatus,
                     pickup=True,
                 )
             else:
@@ -39,31 +39,31 @@ def main():
                     MAX_RIGHT,
                     MIN_REAR,
                     MAX_REAR,
+                    ledStatus,
                     pickup=False,
                 )
         elif action == "left":
             statusLed(ledStatus)
             state = turnLeft(
-                MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR
+                MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR, ledStatus
             )
         elif action == "right":
             statusLed(ledStatus)
             state = turnRight(
-                MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR
+                MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR, ledStatus
             )
         if state == 1:
-            statusLed("red")
             MOTOR_LEFT.duty_cycle = 0
             MOTOR_RIGHT.duty_cycle = 0
             index -= 1
             while True:
+                statusLed("red")
                 if REAR_SWITCH.value:
                     break
 
         SERVO_MOTOR.angle = 180
-        time.sleep(1)
-
-        print(f"Executing action: {action_split}")
+        time.sleep(0.01)
+        print(f"Executing action: {action_split}, state: {state}")
         index += 1
 
     statusLed("off")
@@ -71,14 +71,23 @@ def main():
 
 while True:
     if REAR_SWITCH.value:
-        print("first")
         break
+
 time.sleep(1)
+
+
+statusLed("party")
 MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR = calibrate()
-print("second")
+
+statusLed("off")
+print(MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR)
+
+
 time.sleep(1)
+
 while True:
     if REAR_SWITCH.value:
         break
 
-print("third")
+
+main()

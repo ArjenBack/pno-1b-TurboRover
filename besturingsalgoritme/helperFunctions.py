@@ -112,6 +112,7 @@ def calibrate():
     while True:
         time.sleep(0.05)
 
+        statusLed("party")
         ldr_left_value = LDR_LEFT.value
         ldr_right_value = LDR_RIGHT.value
         ldr_rear_value = LDR_REAR.value
@@ -346,7 +347,14 @@ def autoCalibrate():
 #                              MOVEMENT FUNCTIONS
 # -----------------------------------------------------------------------------
 def driveLine(
-    min_left, max_left, min_right, max_right, min_rear, max_rear, pickup=False
+    min_left,
+    max_left,
+    min_right,
+    max_right,
+    min_rear,
+    max_rear,
+    ledStatus,
+    pickup=False,
 ):
     """
     Drive along line until a crossroad is detected.
@@ -371,11 +379,21 @@ def driveLine(
     up = "start"
     while True:
         time.sleep(0.05)
-
-        if LEFT_SWITCH.value or RIGHT_SWITCH.value:
+        statusLed(ledStatus)
+        if LEFT_SWITCH.value:
+            print("ai, linker bots")
             return 1
 
-        if pickup and time.monotonic() - ref > 0.5 and up == "start":
+        if RIGHT_SWITCH.value:
+            print("ai, rechts bots")
+            return 1
+
+        if FRONT_SWITCH.value:
+            print("ai, vanvoor bots")
+            return 1
+
+        if pickup and time.monotonic() - ref > 1 and up == "start":
+            ledStatus = "orange"
             # print("angle 0 ")
             SERVO_MOTOR.angle = 0
             up = "notDone"
@@ -418,11 +436,17 @@ def driveLine(
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535)
 
         # Detect crossroads by significant change in rear sensor
-        # print(normalizeRear(ldr_rear_value) - normalizeRear(prev_ldr_rear_value))
+        print(
+            normalize(min_rear, max_rear, ldr_rear_value)
+            - normalize(min_rear, max_rear, prev_ldr_rear_value),
+            ref,
+            ldr_rear_value,
+            prev_ldr_rear_value,
+        )
         if (
             normalize(min_rear, max_rear, ldr_rear_value)
             - normalize(min_rear, max_rear, prev_ldr_rear_value)
-        ) > 0.25:
+        ) > 0.25 and time.monotonic() - ref > 0.5:
             #    print("achter")
             break
 
@@ -432,7 +456,7 @@ def driveLine(
     return 0
 
 
-def turnLeft(min_left, max_left, min_right, max_right, min_rear, max_rear):
+def turnLeft(min_left, max_left, min_right, max_right, min_rear, max_rear, ledStatus):
     """
     Make a left turn at a crossroad
 
@@ -459,18 +483,27 @@ def turnLeft(min_left, max_left, min_right, max_right, min_rear, max_rear):
 
     while True:
 
-        time.sleep(0.05)
+        statusLed(ledStatus)
+        time.sleep(0.02)
 
-        if FRONT_SWITCH.value or LEFT_SWITCH.value or RIGHT_SWITCH.value:
+        if LEFT_SWITCH.value:
+            print("ai, linker bots")
             return 1
 
+        if RIGHT_SWITCH.value:
+            print("ai, rechts bots")
+            return 1
+
+        if FRONT_SWITCH.value:
+            print("ai, vanvoor bots")
+            return 1
         ldr_left_value = LDR_LEFT.value
         ldr_right_value = LDR_RIGHT.value
 
         # Check if the rover has turned enough
         if (
             normalize(min_left, max_left, ldr_left_value)
-            - normalize(min_rear, max_rear, ldr_right_value)
+            - normalize(min_right, max_right, ldr_right_value)
             > 0.8
             and time.monotonic() - ref > 0.5
         ):
@@ -487,7 +520,7 @@ def turnLeft(min_left, max_left, min_right, max_right, min_rear, max_rear):
     return 0
 
 
-def turnRight(min_left, max_left, min_right, max_right, min_rear, max_rear):
+def turnRight(min_left, max_left, min_right, max_right, min_rear, max_rear, ledStatus):
     """
     Make a right turn at a crossroad.
 
@@ -515,10 +548,19 @@ def turnRight(min_left, max_left, min_right, max_right, min_rear, max_rear):
     while True:
 
         time.sleep(0.02)
+        statusLed(ledStatus)
 
-        if FRONT_SWITCH.value or LEFT_SWITCH.value or RIGHT_SWITCH.value:
+        if LEFT_SWITCH.value:
+            print("ai, linker bots")
             return 1
 
+        if RIGHT_SWITCH.value:
+            print("ai, rechts bots")
+            return 1
+
+        if FRONT_SWITCH.value:
+            print("ai, vanvoor bots")
+            return 1
         ldr_left_value = LDR_LEFT.value
         ldr_right_value = LDR_RIGHT.value
 
@@ -582,7 +624,7 @@ def statusLed(state="default"):
 
     if state == "orange":
         ref = time.monotonic()
-        value = math.ceil(math.sin(ref))
+        value = math.ceil(math.sin(ref * 2 * math.pi))
 
         LED_RED.duty_cycle = 65535
         LED_GREEN.duty_cycle = int(0.1 * 65535)
@@ -590,14 +632,14 @@ def statusLed(state="default"):
 
     if state == "red":
         ref = time.monotonic()
-        value = math.ceil(math.sin(ref))
+        value = math.ceil(math.sin(ref * 2 * math.pi))
 
         LED_RED.duty_cycle = int(value * 65535)
         LED_GREEN.duty_cycle = 0
         LED_BLUE.duty_cycle = 0
 
     if state == "party":
-        ref = time.monotonic()
+        ref = time.monotonic() * 0.1
 
         f_R, f_G, f_B = 0.5, 0.7, 0.9
         phi_R, phi_G, phi_B = 0, math.pi / 3, 2 * math.pi / 3

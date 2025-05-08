@@ -318,3 +318,14 @@ path = compose(board, (0, 0), (0, 0))
 print(path)
 
 display.displayBoardGUI(oldBoard)
+"""
+board = initiatieboard(4, 6)
+putGreens(board, [(1, 0), (3, 0), (2, 4), (3, 4)])
+putReds(board, [(2, 0), (3, 3)])
+oldBoard = deepcopy(board)
+path = compose(board, (0, 0), (0, 0))
+
+print(path)
+
+display.displayBoardGUI(oldBoard, path)
+"""
