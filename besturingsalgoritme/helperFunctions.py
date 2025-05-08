@@ -355,6 +355,8 @@ def driveLine(
     Stops when a crossroad is detected by the rear sensor.
     """
     SPEED = 0.5
+    x = 0
+    
     ldr_left_value = LDR_LEFT.value
     ldr_right_value = LDR_RIGHT.value
     ldr_rear_value = LDR_REAR.value
@@ -417,12 +419,13 @@ def driveLine(
             # Line is to the left, adjust steering
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535 / 2)
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535)
-            
+
+        # de voorste LDR's lezen beiden een zwarte lijn
         if ( 
             normalize(min_left, max_left, ldr_left_value) > 0.5
             and normalize(min_right, max_right, ldr_right_value) > 0.5
         ): 
-            x = time.monotonic()
+            x += 0.05
             MOTOR_LEFT.duty_cycle = int((1 - 0.4 * x) * SPEED * 65535)
             MOTOR_RIGHT.duty_cycle = int((1 - 0.4 * x) * SPEED * 65535)
         
@@ -461,7 +464,7 @@ def turnLeft(min_left, max_left, min_right, max_right, min_rear, max_rear):
     RELAIS_LEFT.value = not RELAIS_LEFT_DEFAULT
     RELAIS_RIGHT.value = RELAIS_RIGHT_DEFAULT
 
-    # start motors
+    # Start motors
     MOTOR_LEFT.duty_cycle = int(TURN_SPEED * 65535)
     MOTOR_RIGHT.duty_cycle = int(TURN_SPEED * 65535)
 
@@ -490,6 +493,7 @@ def turnLeft(min_left, max_left, min_right, max_right, min_rear, max_rear):
             and time.monotonic() - ref > 0.5
         ):
             crossroad_found = True
+            
             MOTOR_LEFT.duty_cycle = int(0.5 * TURN_SPEED * 65535)
             MOTOR_RIGHT.duty_cycle = int(0.5 * TURN_SPEED * 65535)
 
