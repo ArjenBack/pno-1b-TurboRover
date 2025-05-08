@@ -9,7 +9,7 @@ from adafruit_motor import servo
 # ------------------------------------------------------------------------------
 #                           CONFIGURATION CONSTANTS
 # ------------------------------------------------------------------------------
-SPEED = 0.4
+SPEED = 0.35
 TURN_SPEED = 0.28
 
 # ------------------------------------------------------------------------------
@@ -72,43 +72,19 @@ MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR = (
 # ------------------------------------------------------------------------------
 #                           SENSOR PROCESSING FUNCTIONS
 # ------------------------------------------------------------------------------
-def normalizeLeft(value):
+def normalize(min, max, value):
     """
-    Normalize the value of the left sensor to a percentage (0-1).
+    Normalize the value of the sensor to a percentage (0-1).
 
     Args:
         value (int): Raw sensor value
+        min (int): lowest value from calibration
+        max (int): highest value from calibration
 
     Returns:
         Normalized value (float) between 0 and 1
     """
-    return (value - MIN_LEFT) / (MAX_LEFT - MIN_LEFT)
-
-
-def normalizeRight(value):
-    """
-    Normalize the value of the right sensor to a percentage (0-1).
-
-    Args:
-        value (int): Raw sensor value
-
-    Returns:
-        Normalized value (float) between 0 and 1
-    """
-    return (value - MIN_RIGHT) / (MAX_RIGHT - MIN_RIGHT)
-
-
-def normalizeRear(value):
-    """
-    Normalize the value of the rear sensor to a percentage (0-1).
-
-    Args:
-        value (int): Raw sensor value
-
-    Returns:
-        Normalized value (float) between 0 and 1
-    """
-    return (value - MIN_REAR) / (MAX_REAR - MIN_REAR)
+    return (value - min) / (max - min)
 
 
 def calibrate():
@@ -158,7 +134,209 @@ def calibrate():
         elif ldr_rear_value < MIN_REAR:
             MIN_REAR = ldr_rear_value
 
-        if FRONT_SWITCH.value:
+        if REAR_SWITCH.value:
+            break
+
+    return MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR
+
+
+def autoCalibrate():
+    """
+    Calibrate the min and max values of all LDR sensors.
+
+    The function continuously reads sensor values until the front button is pressed,
+    recording the minimum and maximum values for each sensor.
+
+    Returns:
+        Tuple of min and max values of each sensor
+        (minLeft, maxLeft, minRight,maxRight, minBack, maxRear)
+    """
+    MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR = (
+        28038,
+        43850,
+        21269,
+        39113,
+        14147,
+        27830,
+    )
+
+    min_left, max_left, min_right, max_right, min_rear, max_rear = (
+        28038,
+        43850,
+        21269,
+        39113,
+        14147,
+        27830,
+    )
+
+    ldr_left_value = LDR_LEFT.value
+    ldr_right_value = LDR_RIGHT.value
+    ldr_rear_value = LDR_REAR.value
+
+    RELAIS_LEFT.value = RELAIS_LEFT_DEFAULT
+    RELAIS_RIGHT.value = not RELAIS_RIGHT_DEFAULT
+
+    MOTOR_LEFT.duty_cycle = int(0.2 * 65535)
+    MOTOR_RIGHT.duty_cycle = int(0.2 * 65535)
+    ref = time.monotonic()
+
+    while True:
+        time.sleep(0.05)
+
+        if time.monotonic() - ref > 1:
+            MOTOR_LEFT.duty_cycle = 0
+            MOTOR_RIGHT.duty_cycle = 0
+            break
+
+        ldr_left_value = LDR_LEFT.value
+        ldr_right_value = LDR_RIGHT.value
+        ldr_rear_value = LDR_REAR.value
+
+        if ldr_left_value > MAX_LEFT:
+            MAX_LEFT = ldr_left_value
+
+        elif ldr_left_value < MIN_LEFT:
+            MIN_LEFT = ldr_left_value
+
+        if ldr_right_value > MAX_RIGHT:
+            MAX_RIGHT = ldr_right_value
+
+        elif ldr_right_value < MIN_RIGHT:
+            MIN_RIGHT = ldr_right_value
+
+        if ldr_rear_value > MAX_REAR:
+            MAX_REAR = ldr_rear_value
+
+        elif ldr_rear_value < MIN_REAR:
+            MIN_REAR = ldr_rear_value
+
+    ref = time.monotonic()
+
+    RELAIS_LEFT.value = not RELAIS_LEFT_DEFAULT
+    RELAIS_RIGHT.value = RELAIS_RIGHT_DEFAULT
+    time.sleep(0.01)
+    MOTOR_LEFT.duty_cycle = int(0.2 * 65535)
+    MOTOR_RIGHT.duty_cycle = int(0.2 * 65535)
+
+    while True:
+        time.sleep(0.05)
+
+        if time.monotonic() - ref > 2:
+            MOTOR_LEFT.duty_cycle = 0
+            MOTOR_RIGHT.duty_cycle = 0
+            break
+
+        ldr_left_value = LDR_LEFT.value
+        ldr_right_value = LDR_RIGHT.value
+        ldr_rear_value = LDR_REAR.value
+
+        if ldr_left_value > MAX_LEFT:
+            MAX_LEFT = ldr_left_value
+
+        elif ldr_left_value < MIN_LEFT:
+            MIN_LEFT = ldr_left_value
+
+        if ldr_right_value > MAX_RIGHT:
+            MAX_RIGHT = ldr_right_value
+
+        elif ldr_right_value < MIN_RIGHT:
+            MIN_RIGHT = ldr_right_value
+
+        if ldr_rear_value > MAX_REAR:
+            MAX_REAR = ldr_rear_value
+
+        elif ldr_rear_value < MIN_REAR:
+            MIN_REAR = ldr_rear_value
+
+    RELAIS_LEFT.value = RELAIS_LEFT_DEFAULT
+    RELAIS_RIGHT.value = not RELAIS_RIGHT_DEFAULT
+
+    MOTOR_LEFT.duty_cycle = int(0.2 * 65535)
+    MOTOR_RIGHT.duty_cycle = int(0.2 * 65535)
+    ref = time.monotonic()
+
+    while True:
+        time.sleep(0.05)
+
+        if time.monotonic() - ref > 1:
+            MOTOR_LEFT.duty_cycle = 0
+            MOTOR_RIGHT.duty_cycle = 0
+            break
+
+        ldr_left_value = LDR_LEFT.value
+        ldr_right_value = LDR_RIGHT.value
+        ldr_rear_value = LDR_REAR.value
+
+        if ldr_left_value > MAX_LEFT:
+            MAX_LEFT = ldr_left_value
+
+        elif ldr_left_value < MIN_LEFT:
+            MIN_LEFT = ldr_left_value
+
+        if ldr_right_value > MAX_RIGHT:
+            MAX_RIGHT = ldr_right_value
+
+        elif ldr_right_value < MIN_RIGHT:
+            MIN_RIGHT = ldr_right_value
+
+        if ldr_rear_value > MAX_REAR:
+            MAX_REAR = ldr_rear_value
+
+        elif ldr_rear_value < MIN_REAR:
+            MIN_REAR = ldr_rear_value
+
+        if (
+            normalize(min_left, max_left, ldr_left_value)
+            - normalize(min_right, max_right, ldr_right_value)
+            < -0.40
+        ):
+            break
+
+    ref = time.monotonic()
+    RELAIS_LEFT.value = not RELAIS_LEFT_DEFAULT
+    RELAIS_RIGHT.value = RELAIS_RIGHT_DEFAULT
+    time.sleep(0.01)
+    MOTOR_LEFT.duty_cycle = int(0.2 * 65535)
+    MOTOR_RIGHT.duty_cycle = int(0.2 * 65535)
+
+    while True:
+        time.sleep(0.05)
+
+        prev_ldr_rear_value = ldr_rear_value
+
+        ldr_left_value = LDR_LEFT.value
+        ldr_right_value = LDR_RIGHT.value
+        ldr_rear_value = LDR_REAR.value
+
+        # Line following logic
+        if (
+            normalize(min_left, max_left, ldr_left_value)
+            - normalize(min_right, max_right, ldr_right_value)
+            < -0.40
+        ):
+            # Line is to the right, adjust steering
+            MOTOR_RIGHT.duty_cycle = int(0.2 * 65535 / 2)
+            MOTOR_LEFT.duty_cycle = int(0.2 * 65535)
+
+        elif (
+            normalize(min_left, max_left, ldr_left_value)
+            - normalize(min_right, max_right, ldr_right_value)
+            > 0.40
+        ):
+            # Line is to the left, adjust steering
+            MOTOR_LEFT.duty_cycle = int(0.2 * 65535 / 2)
+            MOTOR_RIGHT.duty_cycle = int(0.2 * 65535)
+
+        else:
+            # Line is centered, go straight
+            MOTOR_LEFT.duty_cycle = int(0.2 * 65535)
+            MOTOR_RIGHT.duty_cycle = int(0.2 * 65535)
+
+        # Detect crossroads by significant change in rear sensor
+        if (
+            normalize(min_rear, max_rear, ldr_rear_value)
+            - normalize(min_rear, max_rear, prev_ldr_rear_value)
+        ) > 0.25:
             break
 
     return MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR
@@ -167,7 +345,9 @@ def calibrate():
 # -----------------------------------------------------------------------------
 #                              MOVEMENT FUNCTIONS
 # -----------------------------------------------------------------------------
-def driveLine():
+def driveLine(
+    min_left, max_left, min_right, max_right, min_rear, max_rear, pickup=False
+):
     """
     Drive along line until a crossroad is detected.
 
@@ -179,6 +359,7 @@ def driveLine():
     ldr_right_value = LDR_RIGHT.value
     ldr_rear_value = LDR_REAR.value
 
+    prev_ldr_rear_value = ldr_rear_value
     # Set motor direction
     RELAIS_LEFT.value = RELAIS_LEFT_DEFAULT
     RELAIS_RIGHT.value = RELAIS_RIGHT_DEFAULT
@@ -186,24 +367,47 @@ def driveLine():
     # Start motors
     MOTOR_LEFT.duty_cycle = int(SPEED * 65000)
     MOTOR_RIGHT.duty_cycle = int(SPEED * 65000)
-
+    ref = time.monotonic()
+    up = "start"
     while True:
         time.sleep(0.05)
 
-        if FRONT_SWITCH.value or LEFT_SWITCH.value or RIGHT_SWITCH.value:
+        if LEFT_SWITCH.value or RIGHT_SWITCH.value:
             return 1
+
+        if pickup and time.monotonic() - ref > 0.5 and up == "start":
+            # print("angle 0 ")
+            SERVO_MOTOR.angle = 0
+            up = "notDone"
+
+        if pickup and time.monotonic() - ref > 1.5 and up == "notDone":
+            # print("angle 160 ")
+            SERVO_MOTOR.angle = 180
+            up = "done"
+
+        prev_ldr_rear_value = ldr_rear_value
 
         ldr_left_value = LDR_LEFT.value
         ldr_right_value = LDR_RIGHT.value
         ldr_rear_value = LDR_REAR.value
 
         # Line following logic
-        if normalizeLeft(ldr_left_value) - normalizeRight(ldr_right_value) < -0.40:
+        if (
+            normalize(min_left, max_left, ldr_left_value)
+            - normalize(min_right, max_right, ldr_right_value)
+            < -0.40
+        ):
+            # print("links")
             # Line is to the right, adjust steering
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535 / 2)
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535)
 
-        elif normalizeLeft(ldr_left_value) - normalizeRight(ldr_right_value) > 0.40:
+        elif (
+            normalize(min_left, max_left, ldr_left_value)
+            - normalize(min_right, max_right, ldr_right_value)
+            > 0.40
+        ):
+            # print("rechts")
             # Line is to the left, adjust steering
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535 / 2)
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535)
@@ -214,15 +418,21 @@ def driveLine():
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535)
 
         # Detect crossroads by significant change in rear sensor
-        if (normalizeRear(ldr_rear_value) - normalizeRear(prev_ldr_rear_value)) > 0.25:
+        # print(normalizeRear(ldr_rear_value) - normalizeRear(prev_ldr_rear_value))
+        if (
+            normalize(min_rear, max_rear, ldr_rear_value)
+            - normalize(min_rear, max_rear, prev_ldr_rear_value)
+        ) > 0.25:
+            #    print("achter")
             break
 
+    SERVO_MOTOR.angle = 180
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
     return 0
 
 
-def turnLeft():
+def turnLeft(min_left, max_left, min_right, max_right, min_rear, max_rear):
     """
     Make a left turn at a crossroad
 
@@ -259,13 +469,15 @@ def turnLeft():
 
         # Check if the rover has turned enough
         if (
-            normalizeLeft(ldr_left_value) - normalizeRight(ldr_right_value) > 0.8
+            normalize(min_left, max_left, ldr_left_value)
+            - normalize(min_rear, max_rear, ldr_right_value)
+            > 0.8
             and time.monotonic() - ref > 0.5
         ):
             crossroad_found = True
 
         # Stop when the rover detects the line again
-        if crossroad_found and normalizeLeft(ldr_left_value) > 0.25:
+        if crossroad_found and normalize(min_left, max_left, ldr_left_value) > 0.25:
             MOTOR_LEFT.duty_cycle = 0
             MOTOR_RIGHT.duty_cycle = 0
             break
@@ -275,7 +487,7 @@ def turnLeft():
     return 0
 
 
-def turnRight():
+def turnRight(min_left, max_left, min_right, max_right, min_rear, max_rear):
     """
     Make a right turn at a crossroad.
 
@@ -312,14 +524,16 @@ def turnRight():
 
         # Check if the rover has turned enough
         if (
-            normalizeLeft(ldr_left_value) - normalizeRight(ldr_right_value) < -0.8
+            normalize(min_left, max_left, ldr_left_value)
+            - normalize(min_right, max_right, ldr_right_value)
+            < -0.8
             and time.monotonic() - ref > 0.5
         ):
             crossroad_found = True
             break
 
         # Stop when the rover detects the line again
-        if crossroad_found and normalizeRight(ldr_right_value) > 0.25:
+        if crossroad_found and normalize(min_right, max_right, ldr_right_value) > 0.25:
             MOTOR_LEFT.duty_cycle = 0
             MOTOR_RIGHT.duty_cycle = 0
             break
@@ -339,7 +553,7 @@ def pickUpTower(slp):
     print("pickup")
     SERVO_MOTOR.angle = 0
     time.sleep(slp)
-    SERVO_MOTOR.angle = 160
+    SERVO_MOTOR.angle = 180
 
 
 # -----------------------------------------------------------------------------

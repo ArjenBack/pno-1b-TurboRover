@@ -5,11 +5,9 @@
 ################
 
 
-from numpy import fix
 import display
 from copy import deepcopy
 import itertools
-import networkx as nx
 
 TIMESTRAIGHT = 3
 TIMETURN = 4
@@ -289,15 +287,17 @@ def compose(board, START, FINISH):
         if cost < bestTime:
             bestTime = cost
             bestPath = permutation
-
+    print(bestPath)
     fullPath = []
 
     for i in range(len(bestPath) - 1):
         start = bestPath[i]
         end = bestPath[i + 1]
         if (start, end) in paths:
+            print(paths[(start, end)])
             fullPath += paths[(start, end)][1]
         else:
+            print(paths[(end, start)])
             fullPath += paths[(end, start)][1][::-1]
 
     sweepedPath = [START]
@@ -310,11 +310,11 @@ def compose(board, START, FINISH):
 
 
 board = initiatieboard(4, 6)
-putGreens(board, [(0, 3), (0, 5), (0, 1), (3, 0), (3, 2), (3, 5)])
-putReds(board, [(0, 2), (1, 2), (1, 4), (3, 4)])
+putGreens(board, [(2, 1), (1, 2), (3, 3), (1, 4), (0, 5), (3, 5)])
+putReds(board, [(1, 0), (2, 2), (3, 2), (2, 3), (0, 4), (2, 5)])
 oldBoard = deepcopy(board)
 print("ANS:")
 path = compose(board, (0, 0), (0, 0))
 print(path)
 
-display.displayBoardGUI(board)
+display.displayBoardGUI(oldBoard)

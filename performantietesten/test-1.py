@@ -1,4 +1,4 @@
-from besturingsalgoritme.helperFunctions import driveLine, turnLeft, turnRight
+from helperFunctions import driveLine, turnLeft, turnRight, calibrate
 import time
 
 
@@ -7,12 +7,15 @@ def testLine():
     totalTime = 0
     for _ in range(N):
         driveLine()
+        print("ik ben dom en net gestopt")
+        time.sleep(0.1)
         startTime = time.monotonic()
-        driveLine()
+        state = driveLine()
         endTime = time.monotonic()
-
         totalTime += endTime - startTime
-        input("Press Enter to continue...")
+
+        test = input("Press Enter to continue...")
+        print("diff: %s -> %s " % (_, endTime - startTime))
 
     print(totalTime / N)
 
@@ -60,3 +63,11 @@ def testPickUp():
         input("Press Enter to continue...")
 
     print(totalTime / N)
+
+
+input("start calibrate")
+MIN_LEFT, MAX_LEFT, MIN_RIGHT, MAX_RIGHT, MIN_REAR, MAX_REAR = calibrate()
+input("start calibrate")
+input("rommel")
+
+testLine()
