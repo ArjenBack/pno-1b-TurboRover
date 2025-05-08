@@ -232,89 +232,86 @@ def calculateCost(permutation, paths):
 
 def compose(board, START, FINISH):
     greens = getGreens(board)
-    if START == FINISH:
-        greens += [START]
-    else:
-        greens += [START, FINISH]
 
-    combinations = itertools.combinations(greens, 2)
+    points = list(greens)
+    unique_points = [START] + list(dict().fromkeys(points)) + [FINISH]
 
+    labels = ["S"] + [chr(ord("a") + i) for i in range(len(unique_points) - 1)]
+    point_to_label = {}
+    for i in range(len(labels)):
+        # print(unique_points[i])
+        if unique_points[i] == (0, 0):
+            point_to_label[unique_points[i]] = "S"
+        else:
+            point_to_label[unique_points[i]] = labels[i]
+
+    label_to_point = {v: k for k, v in point_to_label.items()}
+
+    # print(point_to_label)
+    combinations = itertools.combinations(unique_points, 2)
     paths = {}
-    alph = [
-        "a",
-        "b",
-        "c",
-        "d",
-        "e",
-        "f",
-        "g",
-        "h",
-        "i",
-        "j",
-        "k",
-        "l",
-        "m",
-        "n",
-        "o",
-        "p",
-        "q",
-        "r",
-        "s",
-        "t",
-        "u",
-        "v",
-        "w",
-        "x",
-        "y",
-        "z",
-    ]
+
     for start, end in combinations:
-        allPaths = []
-        solve(board, [start], start, end, allPaths)
-        path = findFastestPath(allPaths)
-        paths[(alph[greens.index(start)], alph[greens.index(end)])] = (
+        all_paths = []
+
+        temp_board = deepcopy(board)
+        solve(temp_board, [start], start, end, all_paths)
+        path = findFastestPath(all_paths)
+        paths[(point_to_label[start], point_to_label[end])] = (
             calculateTime(path),
             path,
         )
+    # print(greens)
+    green_labels = [point_to_label[p] for p in greens]
+    # print("greenlabels %s" % (green_labels))
+    best_time = float("inf")
+    best_order = []
 
-    permutations = itertools.permutations(alph[0 : len(greens)])
+    for perm in itertools.permutations(green_labels):
+        full_route = ["S"] + list(perm) + ["S"]
+        # print(full_route)
+        cost = calculateCost(full_route, paths)
+        if cost < best_time:
+            best_time = cost
+            best_order = full_route
 
-    bestTime = float("inf")
-    bestPath = []
+    full_path = []
 
-    for permutation in permutations:
-        cost = calculateCost(permutation, paths)
-        if cost < bestTime:
-            bestTime = cost
-            bestPath = permutation
-    print(bestPath)
-    fullPath = []
-
-    for i in range(len(bestPath) - 1):
-        start = bestPath[i]
-        end = bestPath[i + 1]
-        if (start, end) in paths:
-            print(paths[(start, end)])
-            fullPath += paths[(start, end)][1]
+    for i in range(len(best_order) - 1):
+        a, b = best_order[i], best_order[i + 1]
+        if (a, b) in paths:
+            full_path += paths[(a, b)][1][:-1]
         else:
-            print(paths[(end, start)])
-            fullPath += paths[(end, start)][1][::-1]
+            full_path += paths[(b, a)][1][::-1][:-1]
 
-    sweepedPath = [START]
-    for i in range(len(fullPath) - 2):
-        if fullPath[i] != fullPath[i + 1]:
-            sweepedPath.append(fullPath[i])
-    sweepedPath.append(fullPath[len(fullPath) - 2])
-    sweepedPath.append(FINISH)
-    return sweepedPath
+    full_path.append(FINISH)
+
+    # Cleanup duplicate consecutive steps
+    cleanedPath = [full_path[0]]
+    for i in range(1, len(full_path)):
+        if full_path[i] != cleanedPath[-1]:
+            cleanedPath.append(full_path[i])
+
+    return cleanedPath
 
 
+"""
 board = initiatieboard(4, 6)
 putGreens(board, [(2, 1), (1, 2), (3, 3), (1, 4), (0, 5), (3, 5)])
 putReds(board, [(1, 0), (2, 2), (3, 2), (2, 3), (0, 4), (2, 5)])
 oldBoard = deepcopy(board)
-print("ANS:")
+# print("ANS:")
 path = compose(board, (0, 0), (0, 0))
-print(path)
+# print(path)
 
 display.displayBoardGUI(oldBoard)
+"""
+board = initiatieboard(4, 6)
+putGreens(board, [(2, 1), (1, 2), (3, 3), (1, 4), (0, 5), (3, 5)])
+putReds(board, [(1, 0), (2, 2), (3, 2), (2, 3), (0, 4), (2, 5)])
+
+oldBoard = deepcopy(board)
+path = compose(board, (0, 0), (0, 0))
+print("Final path:", path)
+
+display.displayBoardGUI(oldBoard, path)
