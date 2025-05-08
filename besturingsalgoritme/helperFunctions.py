@@ -397,6 +397,7 @@ def driveLine(
             - normalize(min_right, max_right, ldr_right_value)
             < -0.40
         ):
+            teller_rechts += 1
             # print("links")
             # Line is to the right, adjust steering
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535 / 2)
@@ -407,6 +408,7 @@ def driveLine(
             - normalize(min_right, max_right, ldr_right_value)
             > 0.40
         ):
+            teller_links += 1
             # print("rechts")
             # Line is to the left, adjust steering
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535 / 2)
@@ -429,6 +431,7 @@ def driveLine(
     SERVO_MOTOR.angle = 180
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
+    print("naar links: %s naar rechts: %s verschil achter: %s" % (teller_links, teller_rechts, normalizeRear(ldr_rear_value) - normalizeRear(prev_ldr_rear_value))    
     return 0
 
 
@@ -540,8 +543,24 @@ def turnRight(min_left, max_left, min_right, max_right, min_rear, max_rear):
 
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
-    return 0
+    print("links - rechts", normalizeLeft(ldr_left_value) - normalizeRight(ldr_right_value))
 
+    return 0
+    
+###########
+# TESTS   #
+###########
+# test draaien
+driveLine()
+start = time.perf_counter()
+turnRight()
+stop = time.perf_counter()
+print("Tijd: ", stop - start)
+
+# test rechtdoor rijden
+driveLine()
+driveLine()
+print("stop")
 
 def pickUpTower(slp):
     """
@@ -554,7 +573,6 @@ def pickUpTower(slp):
     SERVO_MOTOR.angle = 0
     time.sleep(slp)
     SERVO_MOTOR.angle = 180
-
 
 # -----------------------------------------------------------------------------
 #                       STATUS INDICATION FUNCTIONS
