@@ -377,6 +377,10 @@ def driveLine(
     MOTOR_RIGHT.duty_cycle = int(SPEED * 65000)
     ref = time.monotonic()
     up = "start"
+
+    counter_right = 0
+    counter_left = 0
+
     while True:
         time.sleep(0.05)
         statusLed(ledStatus)
@@ -415,7 +419,8 @@ def driveLine(
             - normalize(min_right, max_right, ldr_right_value)
             < -0.40
         ):
-            # print("links")
+            counter_right += 1
+            # print("right")
             # Line is to the right, adjust steering
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535 / 2)
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535)
@@ -425,7 +430,8 @@ def driveLine(
             - normalize(min_right, max_right, ldr_right_value)
             > 0.40
         ):
-            # print("rechts")
+            counter_left += 1
+            # print("left")
             # Line is to the left, adjust steering
             MOTOR_LEFT.duty_cycle = int(SPEED * 65535 / 2)
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535)
@@ -436,6 +442,7 @@ def driveLine(
             MOTOR_RIGHT.duty_cycle = int(SPEED * 65535)
 
         # Detect crossroads by significant change in rear sensor
+<<<<<<< HEAD
         print(
             normalize(min_rear, max_rear, ldr_rear_value)
             - normalize(min_rear, max_rear, prev_ldr_rear_value),
@@ -448,11 +455,19 @@ def driveLine(
             - normalize(min_rear, max_rear, prev_ldr_rear_value)
         ) > 0.25 and time.monotonic() - ref > 0.5:
             #    print("achter")
+=======
+        if (
+            normalize(min_rear, max_rear, ldr_rear_value)
+            - normalize(min_rear, max_rear, prev_ldr_rear_value)
+        ) > 0.25:
+            #    print("rear")
+>>>>>>> 45892a34fd9efd6baa1cf26d1130a81d47936a0a
             break
 
     SERVO_MOTOR.angle = 180
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
+    print("naar links: %s naar rechts: %s verschil achter: %s" % (teller_links, teller_rechts, normalizeRear(ldr_rear_value) - normalizeRear(prev_ldr_rear_value))    
     return 0
 
 
@@ -582,8 +597,24 @@ def turnRight(min_left, max_left, min_right, max_right, min_rear, max_rear, ledS
 
     MOTOR_LEFT.duty_cycle = 0
     MOTOR_RIGHT.duty_cycle = 0
-    return 0
+    print("links - rechts", normalizeLeft(ldr_left_value) - normalizeRight(ldr_right_value))
 
+    return 0
+    
+###########
+# TESTS   #
+###########
+# test draaien
+driveLine()
+start = time.perf_counter()
+turnRight()
+stop = time.perf_counter()
+print("Tijd: ", stop - start)
+
+# test rechtdoor rijden
+driveLine()
+driveLine()
+print("stop")
 
 def pickUpTower(slp):
     """
@@ -596,7 +627,6 @@ def pickUpTower(slp):
     SERVO_MOTOR.angle = 0
     time.sleep(slp)
     SERVO_MOTOR.angle = 180
-
 
 # -----------------------------------------------------------------------------
 #                       STATUS INDICATION FUNCTIONS

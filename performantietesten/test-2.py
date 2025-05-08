@@ -1,8 +1,14 @@
-from helperFunctions import *
+###########
+# TESTS   #
+###########
+# test draaien
+driveLine()
+start = time.perf_counter()
+turnRight()
+stop = time.perf_counter()
+print("Tijd: ", stop - start)
 
-MOTOR_LEFT.duty_cycle = int(0.3 * 65535)
-MOTOR_RIGHT.duty_cycle = int(0.3 * 65535)
-
-while True:
-    if REAR_SWITCH.value:
-        break
+# test rechtdoor rijden
+driveLine()
+driveLine()
+print("stop")
